@@ -193,8 +193,9 @@ function HistoricalView() {
               style={{
                 width: "100%", textAlign: "left", padding: "12px 16px",
                 backgroundColor: selected?.id === e.id ? "#0d0d0d" : "transparent",
+                borderTop: "none", borderRight: "none", borderBottom: "1px solid #0f0f0f",
                 borderLeft: selected?.id === e.id ? "2px solid #f59e0b" : "2px solid transparent",
-                borderBottom: "1px solid #0f0f0f", border: "none", cursor: "pointer",
+                cursor: "pointer",
               }}
             >
               <div style={{ fontSize: 11, fontWeight: 600, color: "#ccc", marginBottom: 4 }}>{e.name}</div>
