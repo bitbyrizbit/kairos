@@ -1,63 +1,72 @@
 "use client"
 
-import { useEffect, useRef } from "react"
 import { scoreColor } from "@/lib/utils"
 import type { SignalCluster } from "@/types"
 
-interface TickerProps {
+interface Props {
   clusters: SignalCluster[]
 }
 
-export function Ticker({ clusters }: TickerProps) {
-  const items = clusters.flatMap(c =>
-    c.signals.slice(0, 2).map(s => ({
-      text: s.headline,
-      score: c.kairos_score,
-      source: s.source,
-    }))
-  )
+export function Ticker({ clusters }: Props) {
+  // deduplicate headlines
+  const seen = new Set<string>()
+  const items: { text: string; score: number; source: string }[] = []
+
+  for (const c of clusters) {
+    for (const s of c.signals.slice(0, 2)) {
+      if (!seen.has(s.headline)) {
+        seen.add(s.headline)
+        items.push({ text: s.headline, score: c.kairos_score, source: s.source })
+      }
+    }
+  }
 
   if (!items.length) {
     return (
-      <div
-        className="h-8 flex items-center px-4 text-xs font-mono"
-        style={{ color: "#475569", borderBottom: "1px solid #0f1f35" }}
-      >
+      <div style={{
+        height: 28, backgroundColor: "#080808",
+        borderBottom: "1px solid #1a1a1a",
+        display: "flex", alignItems: "center", padding: "0 16px",
+        fontSize: 10, color: "#333", fontFamily: "monospace",
+      }}>
         Scanning global signals...
       </div>
     )
   }
 
+  // duplicate for seamless loop
+  const doubled = [...items, ...items]
+
   return (
-    <div
-      className="h-8 overflow-hidden relative flex items-center"
-      style={{ borderBottom: "1px solid #0f1f35", backgroundColor: "#050b18" }}
-    >
-      {/* LIVE indicator */}
-      <div
-        className="flex-shrink-0 flex items-center gap-1.5 px-3 z-10"
-        style={{ borderRight: "1px solid #0f1f35" }}
-      >
-        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse-red" />
-        <span className="text-[10px] font-mono font-bold tracking-widest text-red-500">
-          LIVE
-        </span>
+    <div style={{
+      height: 28, backgroundColor: "#080808",
+      borderBottom: "1px solid #1a1a1a",
+      display: "flex", alignItems: "center",
+      overflow: "hidden", flexShrink: 0,
+    }}>
+      {/* LIVE badge */}
+      <div style={{
+        flexShrink: 0, display: "flex", alignItems: "center", gap: 5,
+        padding: "0 12px", borderRight: "1px solid #1a1a1a", height: "100%",
+      }}>
+        <span style={{ width: 5, height: 5, borderRadius: "50%", backgroundColor: "#ef4444", display: "inline-block", animation: "pulse-dot 1.5s ease-in-out infinite" }} />
+        <span style={{ fontSize: 9, fontWeight: 700, color: "#ef4444", letterSpacing: "0.2em" }}>LIVE</span>
       </div>
 
-      {/* scrolling content */}
-      <div className="flex-1 overflow-hidden">
-        <div className="animate-ticker flex items-center gap-8 whitespace-nowrap">
-          {[...items, ...items].map((item, i) => (
-            <span key={i} className="flex items-center gap-2 text-xs font-mono">
-              <span
-                className="font-semibold"
-                style={{ color: scoreColor(item.score) }}
-              >
+      {/* scrolling */}
+      <div style={{ flex: 1, overflow: "hidden" }}>
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: 32, whiteSpace: "nowrap",
+          animation: `ticker-move ${items.length * 6}s linear infinite`,
+        }}>
+          {doubled.map((item, i) => (
+            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11 }}>
+              <span style={{ fontFamily: "monospace", fontWeight: 700, color: scoreColor(item.score) }}>
                 [{item.score}]
               </span>
-              <span style={{ color: "#94a3b8" }}>{item.text}</span>
-              <span style={{ color: "#334155" }}>— {item.source}</span>
-              <span style={{ color: "#1e3a5f" }}>///</span>
+              <span style={{ color: "#aaa" }}>{item.text}</span>
+              <span style={{ color: "#333" }}>· {item.source.slice(0, 20)}</span>
+              <span style={{ color: "#222", margin: "0 8px" }}>—</span>
             </span>
           ))}
         </div>

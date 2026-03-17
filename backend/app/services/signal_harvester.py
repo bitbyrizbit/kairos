@@ -13,7 +13,6 @@ from app.services import claude_service
 settings = get_settings()
 
 # -- in-memory cache --
-# not redis, not a db — just for a live demo
 _cache: dict = {
     "articles": [],
     "clusters": [],
@@ -21,7 +20,6 @@ _cache: dict = {
     "last_fetched": None,
 }
 
-# keywords that indicate supply chain / geopolitical relevance
 _RELEVANCE_KEYWORDS = [
     "supply chain", "shortage", "sanctions", "conflict", "trade",
     "port", "shipping", "semiconductor", "oil", "gas", "wheat",
@@ -30,14 +28,12 @@ _RELEVANCE_KEYWORDS = [
     "export ban", "production cut", "strike", "logistics", "commodity"
 ]
 
-# newsapi categories we care about
 _CATEGORIES = ["business", "general", "science", "technology"]
 
 
 def _score_relevance(title: str, description: str) -> float:
     text = f"{title} {description}".lower()
     hits = sum(1 for kw in _RELEVANCE_KEYWORDS if kw in text)
-    # rough score — more keyword hits = more relevant
     return min(hits / 5.0, 1.0)
 
 
@@ -49,10 +45,6 @@ def _is_stale() -> bool:
 
 
 async def fetch_articles() -> list[dict]:
-    """
-    Hits NewsAPI for top headlines across relevant categories.
-    Falls back to cached articles if the API is down or we're within the interval.
-    """
     if not _is_stale():
         return _cache["articles"]
 
@@ -71,13 +63,10 @@ async def fetch_articles() -> list[dict]:
                     }
                 )
                 if resp.status_code == 200:
-                    data = resp.json()
-                    articles.extend(data.get("articles", []))
+                    articles.extend(resp.json().get("articles", []))
             except Exception:
-                # if one category fails just skip it, don't crash everything
                 continue
 
-    # also pull everything query for supply chain specifically
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.get(
@@ -95,11 +84,11 @@ async def fetch_articles() -> list[dict]:
     except Exception:
         pass
 
-    # dedupe by title
+    # dedupe raw articles by title
     seen = set()
     unique = []
     for a in articles:
-        title = a.get("title", "")
+        title = (a.get("title") or "").strip().lower()
         if title and title not in seen:
             seen.add(title)
             unique.append(a)
@@ -117,7 +106,7 @@ def _build_signal(article: dict, relevance: float) -> dict:
         "source": article.get("source", {}).get("name", "Unknown"),
         "url": article.get("url", ""),
         "published_at": article.get("publishedAt", ""),
-        "region": "Global",  # NewsAPI doesn't give region, LLM infers it during clustering
+        "region": "Global",
         "category": "news",
         "relevance_score": round(relevance, 2),
         "signal_strength": round(relevance * 0.8, 2),
@@ -125,14 +114,8 @@ def _build_signal(article: dict, relevance: float) -> dict:
 
 
 async def get_signals() -> dict:
-    """
-    Main entry point for the /signals route.
-    Returns clusters + kairos index, refreshing from NewsAPI if cache is stale.
-    """
     articles = await fetch_articles()
 
-    # filter to only supply chain relevant articles before sending to LLM
-    # saves tokens and improves cluster quality
     relevant = [
         a for a in articles
         if _score_relevance(
@@ -156,6 +139,7 @@ async def get_signals() -> dict:
     _cache["kairos_index"] = new_kairos
 
     built_clusters = []
+
     for rc in raw_clusters:
         indices = rc.get("signal_indices", [])
         cluster_articles = [relevant[i] for i in indices if i < len(relevant)]
@@ -165,8 +149,19 @@ async def get_signals() -> dict:
             for a in cluster_articles
         ]
 
+        # 🔥 deduplicate signals by normalized headline
+        seen_headlines = set()
+        unique_signals = []
+
+        for s in signals:
+            headline = (s.get("headline") or "").strip().lower()
+            if headline and headline not in seen_headlines:
+                seen_headlines.add(headline)
+                unique_signals.append(s)
+
+        signals = unique_signals
+
         signal_count = len(signals)
-        # velocity = signals per hour based on oldest article in cluster
         velocity = round(signal_count / max(1, 6), 2)
 
         built_clusters.append({

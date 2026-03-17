@@ -2,34 +2,34 @@
 
 export function LoadingPulse({ message = "Processing..." }: { message?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-12">
-      <div className="relative flex items-center justify-center">
-        <div
-          className="w-12 h-12 rounded-full border-2 animate-spin"
-          style={{ borderColor: "#1e3a5f", borderTopColor: "#f59e0b" }}
-        />
-        <div className="absolute w-3 h-3 rounded-full bg-amber-400" />
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "40px 0" }}>
+      <div style={{ position: "relative", width: 36, height: 36 }}>
+        <div style={{
+          width: 36, height: 36, borderRadius: "50%",
+          border: "2px solid #1a1a1a", borderTopColor: "#f59e0b",
+          animation: "spin-slow 1s linear infinite",
+        }} />
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#f59e0b" }} />
+        </div>
       </div>
-      <p className="text-sm font-mono" style={{ color: "#64748b" }}>
-        {message}
-      </p>
+      <span style={{ fontSize: 11, fontFamily: "monospace", color: "#444" }}>{message}</span>
     </div>
   )
 }
 
-// skeleton for cards while data loads
 export function CardSkeleton({ rows = 3 }: { rows?: number }) {
   return (
-    <div className="space-y-3 p-4">
+    <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10 }}>
       {Array.from({ length: rows }).map((_, i) => (
-        <div
-          key={i}
-          className="h-4 rounded animate-pulse"
-          style={{
-            backgroundColor: "#0f1f35",
-            width: `${70 + (i * 7.3) % 30}%`,
-          }}
-        />
+        <div key={i} style={{
+          height: 14, borderRadius: 3,
+          backgroundColor: "#141414",
+          width: `${65 + (i * 11) % 30}%`,
+        }} />
       ))}
     </div>
   )

@@ -4,25 +4,28 @@ import { LayoutDashboard, Zap, History, Radio, FileText } from "lucide-react"
 
 type View = "dashboard" | "simulator" | "historical" | "signals" | "report"
 
-interface SidebarProps {
+interface Props {
   active: View
   onChange: (v: View) => void
 }
 
 const NAV = [
-  { id: "dashboard",  icon: LayoutDashboard, label: "Dashboard"  },
-  { id: "simulator",  icon: Zap,             label: "Simulator"  },
-  { id: "historical", icon: History,         label: "Historical" },
-  { id: "signals",    icon: Radio,           label: "Signals"    },
-  { id: "report",     icon: FileText,        label: "Report"     },
+  { id: "dashboard",  icon: LayoutDashboard, label: "DASH" },
+  { id: "simulator",  icon: Zap,             label: "SIM"  },
+  { id: "historical", icon: History,         label: "HIST" },
+  { id: "signals",    icon: Radio,           label: "FEED" },
+  { id: "report",     icon: FileText,        label: "RPT"  },
 ] as const
 
-export function Sidebar({ active, onChange }: SidebarProps) {
+export function Sidebar({ active, onChange }: Props) {
   return (
-    <aside
-      className="flex flex-col w-14 flex-shrink-0 py-3 gap-1"
-      style={{ borderRight: "1px solid #0f1f35", backgroundColor: "#050b18" }}
-    >
+    <div style={{
+      width: 56, flexShrink: 0,
+      backgroundColor: "#0a0a0a",
+      borderRight: "1px solid #1a1a1a",
+      display: "flex", flexDirection: "column",
+      alignItems: "center", paddingTop: 8, gap: 2,
+    }}>
       {NAV.map(({ id, icon: Icon, label }) => {
         const isActive = active === id
         return (
@@ -30,30 +33,27 @@ export function Sidebar({ active, onChange }: SidebarProps) {
             key={id}
             onClick={() => onChange(id as View)}
             title={label}
-            className="relative flex items-center justify-center w-full h-10 rounded-none transition-colors group"
             style={{
-              backgroundColor: isActive ? "#0a1628" : "transparent",
+              width: 44, height: 44, borderRadius: 6,
+              display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center", gap: 3,
+              backgroundColor: isActive ? "#141414" : "transparent",
+              border: "none", cursor: "pointer",
               borderLeft: isActive ? "2px solid #f59e0b" : "2px solid transparent",
+              transition: "all 0.15s",
             }}
           >
-            <Icon
-              size={16}
-              style={{ color: isActive ? "#f59e0b" : "#334155" }}
-            />
-            {/* tooltip on hover */}
-            <div
-              className="absolute left-14 z-50 px-2 py-1 rounded text-xs font-mono whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity"
-              style={{
-                backgroundColor: "#0f1f35",
-                border: "1px solid #1e3a5f",
-                color: "#94a3b8",
-              }}
-            >
+            <Icon size={15} color={isActive ? "#f59e0b" : "#444"} />
+            <span style={{
+              fontSize: 8, fontFamily: "monospace", fontWeight: 700,
+              letterSpacing: "0.1em",
+              color: isActive ? "#f59e0b" : "#333",
+            }}>
               {label}
-            </div>
+            </span>
           </button>
         )
       })}
-    </aside>
+    </div>
   )
 }

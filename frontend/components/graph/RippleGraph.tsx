@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { impactColor, scoreColor } from "@/lib/utils"
+import { useEffect, useRef } from "react"
+import { impactColor } from "@/lib/utils"
 import type { RippleChain } from "@/types"
 
 interface Props {
@@ -9,69 +9,52 @@ interface Props {
   isAnimating: boolean
 }
 
-// cytoscape loaded dynamically — it touches window so cant be imported at module level in next.js
 export function RippleGraph({ ripple, isAnimating }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const cyRef = useRef<any>(null)
-  const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    if (!ripple || !containerRef.current) return
+    if (!containerRef.current) return
 
-    let cy: any = null
+    // destroy previous instance — this fixes the re-render issue
+    if (cyRef.current) {
+      cyRef.current.destroy()
+      cyRef.current = null
+    }
+
+    if (!ripple) return
 
     const init = async () => {
       const cytoscape = (await import("cytoscape")).default
 
-      if (cyRef.current) {
-        cyRef.current.destroy()
-        cyRef.current = null
-      }
-
       const nodes: any[] = []
       const edges: any[] = []
+      const seen = new Set<string>([ripple.origin_node])
 
-      // origin node
       nodes.push({
-        data: {
-          id: ripple.origin_node,
-          label: ripple.origin_node,
-          type: "origin",
-          score: 100,
-        }
+        data: { id: ripple.origin_node, label: ripple.origin_node, type: "origin" }
       })
 
-      // hop nodes + edges
-      const seen = new Set<string>([ripple.origin_node])
       for (const hop of ripple.hops) {
         if (!seen.has(hop.node_id)) {
           nodes.push({
             data: {
               id: hop.node_id,
-              label: hop.node_label.length > 14
-                ? hop.node_label.slice(0, 12) + ".."
-                : hop.node_label,
+              label: hop.node_label.length > 12 ? hop.node_label.slice(0, 11) + "…" : hop.node_label,
               type: hop.impact,
-              score: Math.round(hop.severity_score * 100),
               hop: hop.hop,
             }
           })
           seen.add(hop.node_id)
         }
-
-        const prevNode = ripple.hops.find(h => h.hop === hop.hop - 1)
-        const sourceId = prevNode ? prevNode.node_id : ripple.origin_node
-        edges.push({
-          data: {
-            id: `e-${sourceId}-${hop.node_id}`,
-            source: sourceId,
-            target: hop.node_id,
-            impact: hop.impact,
-          }
-        })
+        const prev = ripple.hops.find(h => h.hop === hop.hop - 1)
+        const src = prev ? prev.node_id : ripple.origin_node
+        if (seen.has(src)) {
+          edges.push({ data: { id: `e-${src}-${hop.node_id}`, source: src, target: hop.node_id, impact: hop.impact } })
+        }
       }
 
-      cy = cytoscape({
+      const cy = cytoscape({
         container: containerRef.current,
         elements: { nodes, edges },
         style: [
@@ -81,58 +64,54 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
               "background-color": (ele: any) => {
                 const t = ele.data("type")
                 if (t === "origin") return "#f59e0b"
-                return impactColor(t) + "33"
+                return impactColor(t) + "22"
               },
               "border-color": (ele: any) => {
                 const t = ele.data("type")
                 if (t === "origin") return "#f59e0b"
                 return impactColor(t)
               },
-              "border-width": (ele: any) => ele.data("type") === "origin" ? 3 : 1.5,
+              "border-width": (ele: any) => ele.data("type") === "origin" ? 2.5 : 1.5,
               "label": "data(label)",
-              "color": "#e2e8f0",
-              "font-size": "9px",
+              "color": "#cccccc",
+              "font-size": "10px",
               "font-family": "monospace",
               "text-valign": "bottom",
-              "text-margin-y": 4,
+              "text-margin-y": 5,
               "width": (ele: any) => {
                 const t = ele.data("type")
-                if (t === "origin") return 36
-                if (t === "critical") return 28
-                return 22
+                if (t === "origin") return 44
+                if (t === "critical") return 36
+                if (t === "high") return 32
+                return 26
               },
               "height": (ele: any) => {
                 const t = ele.data("type")
-                if (t === "origin") return 36
-                if (t === "critical") return 28
-                return 22
+                if (t === "origin") return 44
+                if (t === "critical") return 36
+                if (t === "high") return 32
+                return 26
               },
             }
           },
           {
             selector: "edge",
             style: {
-              "width": 1,
-              "line-color": (ele: any) => impactColor(ele.data("impact")) + "55",
-              "target-arrow-color": (ele: any) => impactColor(ele.data("impact")),
+              "width": 1.5,
+              "line-color": (ele: any) => impactColor(ele.data("impact")) + "44",
+              "target-arrow-color": (ele: any) => impactColor(ele.data("impact")) + "88",
               "target-arrow-shape": "triangle",
               "curve-style": "bezier",
-              "arrow-scale": 0.6,
+              "arrow-scale": 0.7,
             }
           },
-          {
-            selector: "node.highlighted",
-            style: {
-              "border-width": 3,
-              "background-color": (ele: any) => impactColor(ele.data("type")) + "66",
-            }
-          }
         ],
         layout: {
           name: "breadthfirst",
           directed: true,
-          padding: 20,
-          spacingFactor: 1.4,
+          padding: 24,
+          spacingFactor: 1.6,
+          animate: false,
         },
         userZoomingEnabled: true,
         userPanningEnabled: true,
@@ -140,87 +119,75 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
       })
 
       cyRef.current = cy
-      setReady(true)
 
-      // animate hops one by one if isAnimating
+      // animate hops appearing one by one
       if (isAnimating) {
-        const allNodes = cy.nodes()
-        allNodes.style("opacity", 0)
+        cy.nodes().style("opacity", 0)
         cy.edges().style("opacity", 0)
-
-        // show origin first
         cy.getElementById(ripple.origin_node).style("opacity", 1)
 
         let i = 0
-        const interval = setInterval(() => {
-          if (i >= ripple.hops.length) {
-            clearInterval(interval)
-            return
-          }
+        const timer = setInterval(() => {
+          if (i >= ripple.hops.length) { clearInterval(timer); return }
           const hop = ripple.hops[i]
-          cy.getElementById(hop.node_id).style("opacity", 1)
-          // show edge too
-          cy.edges().filter((e: any) => e.data("target") === hop.node_id).style("opacity", 1)
+          cy.getElementById(hop.node_id).animate({ style: { opacity: 1 } }, { duration: 200 })
+          cy.edges(`[target = "${hop.node_id}"]`).animate({ style: { opacity: 1 } }, { duration: 200 })
           i++
-        }, 300)
+        }, 250)
       }
     }
 
     init()
 
     return () => {
-      if (cyRef.current) {
-        cyRef.current.destroy()
-        cyRef.current = null
-      }
+      if (cyRef.current) { cyRef.current.destroy(); cyRef.current = null }
     }
-  }, [ripple, isAnimating])
+  }, [ripple]) // ripple in deps — rebuilds completely on new event
 
   return (
-    <div className="card flex flex-col h-full">
-      <div
-        className="flex items-center justify-between px-4 py-3"
-        style={{ borderBottom: "1px solid #0f1f35" }}
-      >
-        <span className="text-xs font-mono font-semibold tracking-wider uppercase" style={{ color: "#94a3b8" }}>
-          Ripple Propagation
-        </span>
+    <div style={{
+      height: "100%", display: "flex", flexDirection: "column",
+      backgroundColor: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, overflow: "hidden",
+    }}>
+      <div style={{
+        padding: "10px 14px", borderBottom: "1px solid #1a1a1a",
+        display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0,
+      }}>
+        <span style={{ fontSize: 10, fontWeight: 700, color: "#666", letterSpacing: "0.15em" }}>RIPPLE PROPAGATION</span>
         {ripple && (
-          <span className="text-[10px] font-mono" style={{ color: "#334155" }}>
+          <span style={{ fontSize: 9, color: "#333", fontFamily: "monospace" }}>
             {ripple.total_hops} hops · {ripple.total_affected_nodes} nodes
           </span>
         )}
       </div>
 
       {!ripple ? (
-        <div className="flex-1 flex flex-col items-center justify-center gap-3">
-          <div className="relative w-16 h-16">
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
+          <div style={{ position: "relative", width: 60, height: 60 }}>
             {[0, 1, 2].map(i => (
-              <div
-                key={i}
-                className="absolute inset-0 rounded-full border"
-                style={{
-                  borderColor: "#1e3a5f",
-                  transform: `scale(${1 + i * 0.4})`,
-                  opacity: 1 - i * 0.3,
-                  animation: `ripple-out ${1.5 + i * 0.5}s ease-out infinite`,
-                  animationDelay: `${i * 0.4}s`,
-                }}
-              />
+              <div key={i} style={{
+                position: "absolute", inset: 0, borderRadius: "50%",
+                border: "1px solid #1a1a1a",
+                transform: `scale(${1 + i * 0.5})`,
+                opacity: 1 - i * 0.3,
+                animation: `pulse-dot ${1.5 + i * 0.4}s ease-in-out infinite`,
+                animationDelay: `${i * 0.3}s`,
+              }} />
             ))}
-            <div
-              className="absolute inset-0 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "#f59e0b22", border: "1px solid #f59e0b44" }}
-            >
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#f59e0b" }} />
+            <div style={{
+              position: "absolute", inset: 0, borderRadius: "50%",
+              backgroundColor: "#f59e0b15", border: "1px solid #f59e0b33",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#f59e0b" }} />
             </div>
           </div>
-          <p className="text-xs font-mono" style={{ color: "#334155" }}>
+          <span style={{ fontSize: 11, color: "#333", fontFamily: "monospace" }}>
             Awaiting disruption event
-          </p>
+          </span>
         </div>
       ) : (
-        <div ref={containerRef} className="flex-1" style={{ minHeight: 0 }} />
+        <div ref={containerRef} style={{ flex: 1, minHeight: 0 }} />
       )}
     </div>
   )

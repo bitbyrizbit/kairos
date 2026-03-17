@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { Zap } from "lucide-react"
 import { DEMO_SCENARIOS } from "@/lib/constants"
 
 interface Props {
@@ -13,87 +12,74 @@ interface Props {
 export function WhatIfInput({ onSubmit, isLoading, mode = "simulate" }: Props) {
   const [value, setValue] = useState("")
 
-  const handleSubmit = () => {
-    const text = value.trim()
-    if (!text || isLoading) return
-    onSubmit(text)
-  }
-
-  const handleScenario = (description: string) => {
-    setValue(description)
-    onSubmit(description)
+  const run = () => {
+    const t = value.trim()
+    if (!t || isLoading) return
+    onSubmit(t)
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* input area */}
-      <div
-        className="rounded-lg overflow-hidden"
-        style={{ border: "1px solid #1e3a5f", backgroundColor: "#0a1628" }}
-      >
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{
+        borderRadius: 6, overflow: "hidden",
+        border: "1px solid #1e1e1e", backgroundColor: "#0d0d0d",
+      }}>
         <textarea
           value={value}
           onChange={e => setValue(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleSubmit()
-          }}
-          placeholder={
-            mode === "analyze"
-              ? "Describe a real disruption event..."
-              : "Describe a hypothetical scenario — e.g. 'What if China blockades Taiwan?'"
-          }
+          onKeyDown={e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) run() }}
+          placeholder={mode === "analyze" ? "Describe a real disruption event..." : "What if China blockades Taiwan? What if Suez Canal closes?"}
           rows={3}
-          className="w-full bg-transparent px-4 pt-3 pb-2 text-sm resize-none outline-none font-mono"
-          style={{ color: "#e2e8f0" }}
           disabled={isLoading}
+          style={{
+            width: "100%", backgroundColor: "transparent", border: "none", outline: "none",
+            padding: "12px 14px", fontSize: 12, color: "#ccc",
+            fontFamily: "monospace", resize: "none", lineHeight: 1.5,
+          }}
         />
-        <div
-          className="flex items-center justify-between px-3 py-2"
-          style={{ borderTop: "1px solid #0f1f35" }}
-        >
-          <span className="text-[10px] font-mono" style={{ color: "#334155" }}>
-            {mode === "simulate" ? "Hypothetical simulation" : "Live event analysis"} · Ctrl+Enter to run
+        <div style={{
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          padding: "8px 12px", borderTop: "1px solid #1a1a1a",
+        }}>
+          <span style={{ fontSize: 9, color: "#333", fontFamily: "monospace" }}>
+            {mode === "simulate" ? "Hypothetical" : "Live event"} · Ctrl+Enter
           </span>
           <button
-            onClick={handleSubmit}
+            onClick={run}
             disabled={!value.trim() || isLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-semibold transition-all"
             style={{
-              backgroundColor: !value.trim() || isLoading ? "#0f1f35" : "#f59e0b",
-              color: !value.trim() || isLoading ? "#334155" : "#050b18",
+              padding: "5px 14px", borderRadius: 4, border: "none",
+              fontSize: 11, fontWeight: 700, fontFamily: "monospace",
               cursor: !value.trim() || isLoading ? "not-allowed" : "pointer",
+              backgroundColor: !value.trim() || isLoading ? "#1a1a1a" : "#f59e0b",
+              color: !value.trim() || isLoading ? "#444" : "#000",
+              transition: "all 0.15s",
             }}
           >
-            <Zap size={11} />
-            {isLoading ? "Analyzing..." : "Run"}
+            {isLoading ? "Running..." : "RUN →"}
           </button>
         </div>
       </div>
 
-      {/* pre-loaded demo scenarios */}
       <div>
-        <p className="text-[10px] font-mono uppercase tracking-wider mb-2" style={{ color: "#334155" }}>
-          Quick scenarios
-        </p>
-        <div className="flex flex-col gap-1.5">
-          {DEMO_SCENARIOS.map(scenario => (
+        <div style={{ fontSize: 9, color: "#333", letterSpacing: "0.15em", marginBottom: 8 }}>QUICK SCENARIOS</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          {DEMO_SCENARIOS.map(s => (
             <button
-              key={scenario.id}
-              onClick={() => handleScenario(scenario.description)}
+              key={s.id}
+              onClick={() => { setValue(s.description); onSubmit(s.description) }}
               disabled={isLoading}
-              className="text-left px-3 py-2 rounded text-xs font-mono card-hover transition-colors"
               style={{
-                backgroundColor: "#0a1628",
-                border: "1px solid #0f1f35",
-                color: "#64748b",
+                textAlign: "left", padding: "8px 12px", borderRadius: 4,
+                backgroundColor: "#0d0d0d", border: "1px solid #1a1a1a",
                 cursor: isLoading ? "not-allowed" : "pointer",
+                transition: "border-color 0.15s",
               }}
+              onMouseEnter={e => !isLoading && (e.currentTarget.style.borderColor = "#2a2a2a")}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = "#1a1a1a")}
             >
-              <span className="font-semibold" style={{ color: "#94a3b8" }}>
-                {scenario.label}
-              </span>
-              <br />
-              <span style={{ color: "#475569" }}>{scenario.description}</span>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#888", marginBottom: 2 }}>{s.label}</div>
+              <div style={{ fontSize: 10, color: "#444", lineHeight: 1.4 }}>{s.description}</div>
             </button>
           ))}
         </div>

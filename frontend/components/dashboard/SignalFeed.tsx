@@ -9,100 +9,74 @@ interface Props {
 }
 
 export function SignalFeed({ clusters, lastUpdated }: Props) {
-  // flatten all signals across clusters, sort by score
-  const signals = clusters
-    .flatMap(c =>
-      c.signals.map(s => ({
-        ...s,
-        cluster_theme: c.theme,
-        cluster_score: c.kairos_score,
-      }))
-    )
-    .sort((a, b) => b.cluster_score - a.cluster_score)
-    .slice(0, 20)
+  const seen = new Set<string>()
+  const signals: { headline: string; source: string; url: string; score: number; theme: string }[] = []
+
+  for (const c of clusters) {
+    for (const s of c.signals) {
+      if (!seen.has(s.headline)) {
+        seen.add(s.headline)
+        signals.push({ headline: s.headline, source: s.source, url: s.url, score: c.kairos_score, theme: c.theme })
+      }
+    }
+  }
+
+  signals.sort((a, b) => b.score - a.score)
+  const top = signals.slice(0, 18)
 
   return (
-    <div className="card flex flex-col h-full">
-      <div
-        className="flex items-center justify-between px-4 py-3"
-        style={{ borderBottom: "1px solid #0f1f35" }}
-      >
-        <div className="flex items-center gap-2">
-          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse-red" />
-          <span className="text-xs font-mono font-semibold tracking-wider uppercase" style={{ color: "#94a3b8" }}>
-            Signal Feed
-          </span>
+    <div style={{
+      height: "100%", display: "flex", flexDirection: "column",
+      backgroundColor: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, overflow: "hidden",
+    }}>
+      <div style={{
+        padding: "10px 14px", borderBottom: "1px solid #1a1a1a",
+        display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0,
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ width: 5, height: 5, borderRadius: "50%", backgroundColor: "#ef4444", display: "inline-block", animation: "pulse-dot 1.5s ease-in-out infinite" }} />
+          <span style={{ fontSize: 10, fontWeight: 700, color: "#666", letterSpacing: "0.15em" }}>SIGNAL FEED</span>
         </div>
-        <span className="text-[10px] font-mono" style={{ color: "#334155" }}>
-          {lastUpdated ? `updated ${formatTime(lastUpdated)}` : "—"}
+        <span style={{ fontSize: 9, color: "#333", fontFamily: "monospace" }}>
+          {lastUpdated ? formatTime(lastUpdated) : "—"}
         </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        {signals.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-32 gap-2">
-            <div
-              className="w-6 h-6 rounded-full border border-dashed animate-spin"
-              style={{ borderColor: "#1e3a5f" }}
-            />
-            <span className="text-xs font-mono" style={{ color: "#334155" }}>
-              Scanning feeds...
-            </span>
+      <div style={{ flex: 1, overflowY: "auto" }}>
+        {top.length === 0 ? (
+          <div style={{ padding: 20, textAlign: "center", fontSize: 11, color: "#333" }}>
+            Scanning feeds...
           </div>
         ) : (
-          signals.map((signal, i) => (
+          top.map((s, i) => (
             <a
-              key={signal.id + i}
-              href={signal.url || "#"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-start gap-3 px-4 py-2.5 card-hover block"
-              style={{ borderBottom: "1px solid #0a1628", textDecoration: "none" }}
+              key={i} href={s.url || "#"} target="_blank" rel="noopener noreferrer"
+              style={{
+                display: "block", padding: "8px 14px",
+                borderBottom: "1px solid #0f0f0f",
+                textDecoration: "none",
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#111")}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
             >
-              {/* signal strength bar */}
-              <div className="flex flex-col items-center gap-0.5 mt-1 flex-shrink-0">
-                {[1, 0.7, 0.4].map((threshold, j) => (
-                  <div
-                    key={j}
-                    className="w-0.5 rounded-full"
-                    style={{
-                      height: 4 + j * 2,
-                      backgroundColor:
-                        signal.signal_strength >= threshold
-                          ? scoreColor(signal.cluster_score)
-                          : "#1e3a5f",
-                    }}
-                  />
-                ))}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <p
-                  className="text-xs leading-snug line-clamp-2"
-                  style={{ color: "#cbd5e1" }}
-                >
-                  {signal.headline}
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+                <p style={{ fontSize: 11, color: "#ccc", lineHeight: 1.4, flex: 1,
+                  overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any }}>
+                  {s.headline}
                 </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] font-mono" style={{ color: "#334155" }}>
-                    {signal.source}
-                  </span>
-                  <span style={{ color: "#1e3a5f" }}>·</span>
-                  <span
-                    className="text-[10px] font-mono truncate"
-                    style={{ color: scoreColor(signal.cluster_score) }}
-                  >
-                    {signal.cluster_theme}
-                  </span>
-                </div>
+                <span style={{ fontSize: 12, fontWeight: 900, color: scoreColor(s.score), fontFamily: "monospace", flexShrink: 0 }}>
+                  {s.score}
+                </span>
               </div>
-
-              <span
-                className="text-[10px] font-mono font-bold flex-shrink-0 mt-0.5"
-                style={{ color: scoreColor(signal.cluster_score) }}
-              >
-                {signal.cluster_score}
-              </span>
+              <div style={{ display: "flex", gap: 8, marginTop: 3 }}>
+                <span style={{ fontSize: 9, color: "#3d6b9e", fontFamily: "monospace" }}>{s.source}</span>
+                <span style={{ fontSize: 9, color: "#333" }}>·</span>
+                <span style={{ fontSize: 9, color: scoreColor(s.score), opacity: 0.7, fontFamily: "monospace",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 120 }}>
+                  {s.theme}
+                </span>
+              </div>
             </a>
           ))
         )}

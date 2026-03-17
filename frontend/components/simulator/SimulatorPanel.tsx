@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { Download, AlertTriangle } from "lucide-react"
 import { WhatIfInput } from "./WhatIfInput"
 import { RippleGraph } from "@/components/graph/RippleGraph"
 import { CrisisTimeline } from "@/components/dashboard/CrisisTimeline"
@@ -20,145 +19,115 @@ export function SimulatorPanel({ mode = "simulate" }: Props) {
   const [result, setResult] = useState<AnalyzeResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [downloading, setDownloading] = useState(false)
   const [lastQuery, setLastQuery] = useState("")
+  const [downloading, setDownloading] = useState(false)
 
-  const handleSubmit = async (description: string) => {
+  const run = async (description: string) => {
     setLoading(true)
     setError(null)
+    setResult(null) // clear previous result — fixes same graph issue
     setLastQuery(description)
-
     try {
-      const data = mode === "simulate"
-        ? await api.simulate(description)
-        : await api.analyze(description)
+      const data = mode === "simulate" ? await api.simulate(description) : await api.analyze(description)
       setResult(data)
     } catch (err: any) {
-      setError(err?.response?.data?.detail || "Analysis failed. Check backend connection.")
+      setError(err?.response?.data?.detail || "Request failed. Is the backend running?")
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDownload = async () => {
+  const download = async () => {
     if (!result) return
     setDownloading(true)
     try {
-      const blob = await api.report(
-        lastQuery,
-        result.ripple_chain,
-        result.kairos_score
-      )
-      downloadBlob(blob, `kairos-brief-${result.kairos_score}.pdf`)
-    } catch {
-      // silent fail on report download
-    } finally {
-      setDownloading(false)
-    }
+      const blob = await api.report(lastQuery, result.ripple_chain, result.kairos_score)
+      downloadBlob(blob, `kairos-${result.kairos_score}.pdf`)
+    } catch { /* silent */ }
+    finally { setDownloading(false) }
   }
 
   return (
-    <div className="flex flex-col h-full gap-4 p-4 overflow-y-auto">
-      <div className="flex items-center justify-between">
+    <div style={{ height: "100%", overflowY: "auto", padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <h2 className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: "#e0e0e0", marginBottom: 4 }}>
             {mode === "simulate" ? "What-If Simulator" : "Event Analyzer"}
           </h2>
-          <p className="text-xs mt-0.5" style={{ color: "#475569" }}>
-            {mode === "simulate"
-              ? "Inject any hypothetical disruption and trace its global cascade"
-              : "Analyze a real event and map its supply chain impact"}
+          <p style={{ fontSize: 11, color: "#444" }}>
+            {mode === "simulate" ? "Inject any hypothetical disruption and trace its global cascade" : "Analyze a real event and map its supply chain impact"}
           </p>
         </div>
         {result && (
           <button
-            onClick={handleDownload}
+            onClick={download}
             disabled={downloading}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono transition-colors"
             style={{
-              border: "1px solid #1e3a5f",
-              color: downloading ? "#334155" : "#94a3b8",
-              backgroundColor: "#0a1628",
+              padding: "6px 12px", borderRadius: 4, border: "1px solid #222",
+              fontSize: 10, fontFamily: "monospace", color: downloading ? "#333" : "#777",
+              backgroundColor: "#0d0d0d", cursor: downloading ? "not-allowed" : "pointer",
             }}
           >
-            <Download size={11} />
             {downloading ? "Generating..." : "Export PDF"}
           </button>
         )}
       </div>
 
-      <WhatIfInput onSubmit={handleSubmit} isLoading={loading} mode={mode} />
+      <WhatIfInput onSubmit={run} isLoading={loading} mode={mode} />
 
       {error && (
-        <div
-          className="flex items-start gap-2 px-3 py-2 rounded text-xs font-mono"
-          style={{ backgroundColor: "#1a0a0a", border: "1px solid #ef444433", color: "#ef4444" }}
-        >
-          <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
-          {error}
+        <div style={{
+          padding: "10px 14px", borderRadius: 4,
+          backgroundColor: "#1a0808", border: "1px solid #3a1010",
+          fontSize: 11, color: "#ef4444", fontFamily: "monospace",
+        }}>
+          ⚠ {error}
         </div>
       )}
 
-      {loading && (
-        <LoadingPulse message="Running cascade simulation..." />
-      )}
+      {loading && <LoadingPulse message="Running cascade simulation..." />}
 
       {result && !loading && (
-        <div className="flex flex-col gap-4 animate-fade-in">
-          {/* score + narrative */}
-          <div
-            className="card p-4 flex gap-4"
-          >
-            <ScoreRing score={result.kairos_score} size={72} />
-            <div className="flex flex-col gap-2 flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <Badge
-                  label={result.risk_status}
-                  type="status"
-                  value={result.risk_status}
-                />
-                <span className="text-xs font-mono" style={{ color: "#475569" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, animation: "fade-up 0.3s ease-out" }}>
+          {/* score card */}
+          <div style={{
+            padding: 16, borderRadius: 6,
+            backgroundColor: "#0d0d0d", border: "1px solid #1a1a1a",
+            display: "flex", gap: 16, alignItems: "flex-start",
+          }}>
+            <ScoreRing score={result.kairos_score} size={76} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+                <Badge label={result.risk_status} type="status" value={result.risk_status} />
+                <span style={{ fontSize: 10, color: "#555", fontFamily: "monospace" }}>
                   {result.parsed_event.origin_region} · {result.parsed_event.affected_commodity}
                 </span>
-                {result.ripple_chain.multi_crisis_detected && (
-                  <Badge label="COMPOUND RISK" size="sm" />
-                )}
               </div>
-              <p className="text-xs leading-relaxed" style={{ color: "#94a3b8" }}>
-                {result.crisis_narrative}
-              </p>
+              <p style={{ fontSize: 12, color: "#999", lineHeight: 1.6 }}>{result.crisis_narrative}</p>
             </div>
           </div>
 
-          {/* graph + timeline side by side */}
-          <div className="grid grid-cols-2 gap-4" style={{ minHeight: 320 }}>
+          {/* graph + timeline */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, height: 340 }}>
             <RippleGraph ripple={result.ripple_chain} isAnimating={true} />
             <CrisisTimeline ripple={result.ripple_chain} event={lastQuery} />
           </div>
 
-          {/* recommended actions */}
-          {result.recommended_actions.length > 0 && (
-            <div className="card p-4">
-              <p
-                className="text-[10px] font-mono uppercase tracking-wider mb-3"
-                style={{ color: "#475569" }}
-              >
-                Recommended Actions
-              </p>
-              <div className="grid grid-cols-2 gap-2">
-                {result.recommended_actions.map((action, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-2 px-3 py-2 rounded text-xs"
-                    style={{ backgroundColor: "#0a1628", border: "1px solid #0f1f35" }}
-                  >
-                    <span
-                      className="font-mono font-bold flex-shrink-0"
-                      style={{ color: "#f59e0b" }}
-                    >
+          {/* actions */}
+          {(result.recommended_actions ?? []).length > 0 && (
+            <div style={{ padding: 16, borderRadius: 6, backgroundColor: "#0d0d0d", border: "1px solid #1a1a1a" }}>
+              <div style={{ fontSize: 9, color: "#444", letterSpacing: "0.15em", marginBottom: 10 }}>RECOMMENDED ACTIONS</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                {(result.recommended_actions ?? []).map((a, i) => (
+                  <div key={i} style={{
+                    display: "flex", gap: 10, padding: "8px 12px", borderRadius: 4,
+                    backgroundColor: "#0a0a0a", border: "1px solid #1a1a1a",
+                  }}>
+                    <span style={{ fontSize: 11, fontWeight: 900, color: "#f59e0b", fontFamily: "monospace", flexShrink: 0 }}>
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span style={{ color: "#94a3b8" }}>{action}</span>
+                    <span style={{ fontSize: 11, color: "#888", lineHeight: 1.4 }}>{a}</span>
                   </div>
                 ))}
               </div>
@@ -166,22 +135,14 @@ export function SimulatorPanel({ mode = "simulate" }: Props) {
           )}
 
           {/* historical parallels */}
-          {result.similar_historical_events.length > 0 && (
-            <div className="card p-4">
-              <p
-                className="text-[10px] font-mono uppercase tracking-wider mb-2"
-                style={{ color: "#475569" }}
-              >
-                Historical Parallels
-              </p>
-              <div className="flex flex-col gap-1">
-                {result.similar_historical_events.map((evt, i) => (
-                  <div key={i} className="flex items-center gap-2 text-xs">
-                    <span style={{ color: "#334155" }}>—</span>
-                    <span style={{ color: "#64748b" }}>{evt}</span>
-                  </div>
-                ))}
-              </div>
+          {(result.similar_historical_events ?? []).length > 0 && (
+            <div style={{ padding: 16, borderRadius: 6, backgroundColor: "#0d0d0d", border: "1px solid #1a1a1a" }}>
+              <div style={{ fontSize: 9, color: "#444", letterSpacing: "0.15em", marginBottom: 8 }}>HISTORICAL PARALLELS</div>
+              {(result.similar_historical_events ?? []).map((e, i) => (
+                <div key={i} style={{ display: "flex", gap: 8, padding: "4px 0", fontSize: 11, color: "#555" }}>
+                  <span style={{ color: "#2a2a2a" }}>—</span>{e}
+                </div>
+              ))}
             </div>
           )}
         </div>

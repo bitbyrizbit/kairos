@@ -1,106 +1,98 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { scoreColor, statusColor } from "@/lib/utils"
+import { useEffect, useState } from "react"
+import { scoreColor, scoreLabel } from "@/lib/utils"
 import type { KairosIndex } from "@/types"
 
-interface NavbarProps {
+interface Props {
   kairosIndex: KairosIndex | null
 }
 
-export function Navbar({ kairosIndex }: NavbarProps) {
+export function Navbar({ kairosIndex }: Props) {
   const [time, setTime] = useState("")
 
   useEffect(() => {
-    const tick = () => {
-      setTime(new Date().toUTCString().slice(17, 25) + " UTC")
-    }
+    const tick = () => setTime(new Date().toUTCString().slice(17, 25) + " UTC")
     tick()
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
   }, [])
 
-  const indexVal = kairosIndex?.index_value ?? 0
-  const indexColor = scoreColor(indexVal)
+  const val = kairosIndex?.index_value ?? 0
+  const color = scoreColor(val)
+  const label = scoreLabel(val)
 
   return (
-    <header
-      className="flex items-center justify-between px-6 h-14 flex-shrink-0"
-      style={{ borderBottom: "1px solid #0f1f35", backgroundColor: "#050b18" }}
+    <div
+      style={{
+        height: 48,
+        backgroundColor: "#0a0a0a",
+        borderBottom: "1px solid #1e1e1e",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 20px",
+        flexShrink: 0,
+      }}
     >
-      {/* left — logo */}
-      <div className="flex items-center gap-3">
-        <div className="relative">
-          <div
-            className="w-7 h-7 rounded flex items-center justify-center text-xs font-black"
-            style={{ backgroundColor: "#f59e0b", color: "#050b18" }}
-          >
-            K
-          </div>
-          {/* live pulse dot */}
-          <span
-            className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full animate-pulse-red"
-            style={{ backgroundColor: "#ef4444" }}
-          />
+      {/* logo */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{
+          width: 28, height: 28, borderRadius: 6,
+          backgroundColor: "#f59e0b",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: 13, fontWeight: 900, color: "#000", letterSpacing: 1,
+          position: "relative",
+        }}>
+          K
+          <span style={{
+            position: "absolute", top: -3, right: -3,
+            width: 7, height: 7, borderRadius: "50%",
+            backgroundColor: "#ef4444",
+            animation: "pulse-dot 1.5s ease-in-out infinite",
+          }} />
         </div>
         <div>
-          <span className="text-sm font-bold tracking-widest" style={{ color: "#e2e8f0" }}>
+          <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: "0.15em", color: "#f0f0f0" }}>
             KAIROS
-          </span>
-          <span
-            className="ml-2 text-[10px] font-mono tracking-wider"
-            style={{ color: "#475569" }}
-          >
+          </div>
+          <div style={{ fontSize: 9, color: "#444", letterSpacing: "0.2em", marginTop: -1 }}>
             CRISIS INTELLIGENCE
-          </span>
+          </div>
         </div>
       </div>
 
-      {/* center — foresight index */}
+      {/* foresight index */}
       {kairosIndex && (
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-mono tracking-widest uppercase" style={{ color: "#475569" }}>
-            Foresight Index
-          </span>
-          <div
-            className="flex items-center gap-1.5 px-3 py-1 rounded font-mono"
-            style={{
-              backgroundColor: `${indexColor}12`,
-              border: `1px solid ${indexColor}30`,
-            }}
-          >
-            <span className="text-lg font-black" style={{ color: indexColor }}>
-              {indexVal}
-            </span>
-            <div className="flex flex-col">
-              <span className="text-[9px] font-semibold tracking-wider uppercase" style={{ color: indexColor }}>
-                {kairosIndex.status}
-              </span>
-              {kairosIndex.delta_1h !== 0 && (
-                <span
-                  className="text-[9px] font-mono"
-                  style={{ color: kairosIndex.delta_1h > 0 ? "#ef4444" : "#22c55e" }}
-                >
-                  {kairosIndex.delta_1h > 0 ? "▲" : "▼"} {Math.abs(kairosIndex.delta_1h)} 1h
-                </span>
-              )}
-            </div>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 10,
+          padding: "4px 14px", borderRadius: 6,
+          backgroundColor: `${color}10`,
+          border: `1px solid ${color}25`,
+        }}>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontSize: 9, color: "#555", letterSpacing: "0.15em" }}>FORESIGHT INDEX</div>
+            <div style={{ fontSize: 9, color: "#555", letterSpacing: "0.1em" }}>{kairosIndex.highest_risk_region} · {kairosIndex.highest_risk_commodity}</div>
+          </div>
+          <div style={{ fontSize: 28, fontWeight: 900, color, fontFamily: "monospace", lineHeight: 1 }}>
+            {val}
+          </div>
+          <div>
+            <div style={{ fontSize: 9, fontWeight: 700, color, letterSpacing: "0.15em" }}>{label}</div>
+            {kairosIndex.delta_1h !== 0 && (
+              <div style={{ fontSize: 9, color: kairosIndex.delta_1h > 0 ? "#ef4444" : "#22c55e" }}>
+                {kairosIndex.delta_1h > 0 ? "▲" : "▼"} {Math.abs(kairosIndex.delta_1h)} 1h
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* right — clock + status */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-          <span className="text-[10px] font-mono" style={{ color: "#475569" }}>
-            LIVE
-          </span>
-        </div>
-        <span className="text-[11px] font-mono tabular-nums" style={{ color: "#334155" }}>
-          {time}
-        </span>
+      {/* time */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#22c55e", display: "inline-block", animation: "pulse-dot 2s ease-in-out infinite" }} />
+        <span style={{ fontSize: 11, fontFamily: "monospace", color: "#555", letterSpacing: "0.05em" }}>{time}</span>
       </div>
-    </header>
+    </div>
   )
 }

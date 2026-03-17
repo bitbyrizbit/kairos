@@ -2,61 +2,43 @@
 
 import { scoreColor, scoreLabel } from "@/lib/utils"
 
-interface ScoreRingProps {
+interface Props {
   score: number
   size?: number
   showLabel?: boolean
 }
 
-export function ScoreRing({ score, size = 80, showLabel = true }: ScoreRingProps) {
-  const radius = (size - 10) / 2
-  const circumference = 2 * Math.PI * radius
-  // score goes 0-100, map to stroke dashoffset
-  const offset = circumference - (score / 100) * circumference
+export function ScoreRing({ score, size = 80, showLabel = true }: Props) {
+  const r = (size - 12) / 2
+  const circ = 2 * Math.PI * r
+  const offset = circ - (score / 100) * circ
   const color = scoreColor(score)
-  const label = scoreLabel(score)
 
   return (
-    <div className="flex flex-col items-center gap-1">
-      <div className="relative" style={{ width: size, height: size }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+      <div style={{ position: "relative", width: size, height: size }}>
         <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-          {/* background ring */}
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#1a1a1a" strokeWidth={7} />
           <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke="#1e3a5f"
-            strokeWidth={6}
-          />
-          {/* score ring */}
-          <circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            fill="none"
-            stroke={color}
-            strokeWidth={6}
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
+            cx={size/2} cy={size/2} r={r} fill="none"
+            stroke={color} strokeWidth={7}
+            strokeDasharray={circ} strokeDashoffset={offset}
             strokeLinecap="round"
-            style={{ transition: "stroke-dashoffset 0.8s ease, stroke 0.4s ease" }}
+            style={{ transition: "stroke-dashoffset 1s ease, stroke 0.3s ease", filter: `drop-shadow(0 0 6px ${color}66)` }}
           />
         </svg>
-        {/* number in center */}
-        <div
-          className="absolute inset-0 flex items-center justify-center font-bold font-mono"
-          style={{ fontSize: size * 0.22, color }}
-        >
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: size * 0.24, fontWeight: 900, color,
+          fontFamily: "monospace",
+        }}>
           {score}
         </div>
       </div>
       {showLabel && (
-        <span
-          className="text-[10px] font-mono font-semibold tracking-widest uppercase"
-          style={{ color }}
-        >
-          {label}
+        <span style={{ fontSize: 9, fontWeight: 700, color, letterSpacing: "0.15em", fontFamily: "monospace" }}>
+          {scoreLabel(score)}
         </span>
       )}
     </div>

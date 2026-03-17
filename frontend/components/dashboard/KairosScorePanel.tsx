@@ -11,125 +11,92 @@ interface Props {
 }
 
 export function KairosScorePanel({ clusters, kairosIndex }: Props) {
-  const top5 = [...clusters]
-    .sort((a, b) => b.kairos_score - a.kairos_score)
-    .slice(0, 5)
+  const top5 = [...clusters].sort((a, b) => b.kairos_score - a.kairos_score).slice(0, 5)
 
   return (
-    <div className="card flex flex-col h-full">
-      <div
-        className="flex items-center justify-between px-4 py-3"
-        style={{ borderBottom: "1px solid #0f1f35" }}
-      >
-        <span className="text-xs font-mono font-semibold tracking-wider uppercase" style={{ color: "#94a3b8" }}>
-          Active Risk Clusters
+    <div style={{
+      height: "100%", display: "flex", flexDirection: "column",
+      backgroundColor: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, overflow: "hidden",
+    }}>
+      {/* header */}
+      <div style={{
+        padding: "10px 14px", borderBottom: "1px solid #1a1a1a",
+        display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0,
+      }}>
+        <span style={{ fontSize: 10, fontWeight: 700, color: "#666", letterSpacing: "0.15em" }}>
+          RISK CLUSTERS
         </span>
-        <span className="text-[10px] font-mono" style={{ color: "#334155" }}>
-          {clusters.length} detected
+        <span style={{ fontSize: 9, color: "#333", fontFamily: "monospace" }}>
+          {clusters.length} active
         </span>
       </div>
 
-      {/* global index summary */}
+      {/* index summary */}
       {kairosIndex && (
-        <div
-          className="flex items-center gap-4 px-4 py-3"
-          style={{ borderBottom: "1px solid #0f1f35" }}
-        >
-          <ScoreRing score={kairosIndex.index_value} size={64} />
-          <div className="flex flex-col gap-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono" style={{ color: "#64748b" }}>
-                Highest risk region
-              </span>
-              <span className="text-xs font-semibold" style={{ color: "#e2e8f0" }}>
-                {kairosIndex.highest_risk_region}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono" style={{ color: "#64748b" }}>
-                Top commodity
-              </span>
-              <span className="text-xs font-semibold" style={{ color: "#e2e8f0" }}>
-                {kairosIndex.highest_risk_commodity}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono" style={{ color: "#64748b" }}>
-                Active clusters
-              </span>
-              <span className="text-xs font-semibold" style={{ color: "#e2e8f0" }}>
-                {kairosIndex.active_clusters}
-              </span>
-            </div>
+        <div style={{
+          padding: "12px 14px", borderBottom: "1px solid #1a1a1a",
+          display: "flex", alignItems: "center", gap: 14, flexShrink: 0,
+        }}>
+          <ScoreRing score={kairosIndex.index_value} size={68} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 5, flex: 1, minWidth: 0 }}>
+            {[
+              { label: "Region", value: kairosIndex.highest_risk_region },
+              { label: "Commodity", value: kairosIndex.highest_risk_commodity },
+              { label: "Clusters", value: String(kairosIndex.active_clusters) },
+            ].map(({ label, value }) => (
+              <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 10, color: "#444" }}>{label}</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: "#ccc", textAlign: "right", maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</span>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* top 5 clusters */}
-      <div className="flex-1 overflow-y-auto">
+      {/* clusters list */}
+      <div style={{ flex: 1, overflowY: "auto" }}>
         {top5.length === 0 ? (
-          <div className="flex items-center justify-center h-24">
-            <span className="text-xs font-mono" style={{ color: "#334155" }}>
-              No active clusters
-            </span>
+          <div style={{ padding: 20, textAlign: "center", fontSize: 11, color: "#333" }}>
+            No active clusters
           </div>
         ) : (
-          top5.map((cluster, i) => (
-            <div
-              key={cluster.cluster_id}
-              className="flex items-start gap-3 px-4 py-3 card-hover cursor-default"
-              style={{ borderBottom: "1px solid #0a1628" }}
-            >
-              {/* rank */}
-              <span
-                className="text-xs font-mono font-bold mt-0.5 w-4 flex-shrink-0"
-                style={{ color: "#334155" }}
-              >
-                {i + 1}
-              </span>
-
-              <div className="flex-1 min-w-0 flex flex-col gap-1">
-                <div className="flex items-center justify-between gap-2">
-                  <span
-                    className="text-xs font-semibold truncate"
-                    style={{ color: "#e2e8f0" }}
-                  >
-                    {cluster.theme}
+          top5.map((c, i) => {
+            const color = scoreColor(c.kairos_score)
+            return (
+              <div key={c.cluster_id} style={{
+                padding: "10px 14px",
+                borderBottom: "1px solid #111",
+                borderLeft: `2px solid ${color}`,
+                cursor: "default",
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 4 }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: "#ddd", lineHeight: 1.3, flex: 1 }}>
+                    {c.theme}
                   </span>
-                  <span
-                    className="text-sm font-black font-mono flex-shrink-0"
-                    style={{ color: scoreColor(cluster.kairos_score) }}
-                  >
-                    {cluster.kairos_score}
+                  <span style={{ fontSize: 16, fontWeight: 900, color, fontFamily: "monospace", flexShrink: 0 }}>
+                    {c.kairos_score}
                   </span>
                 </div>
-
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge
-                    label={cluster.risk_status}
-                    type="status"
-                    value={cluster.risk_status}
-                    size="sm"
-                  />
-                  {cluster.primary_regions[0] && (
-                    <span className="text-[10px] font-mono" style={{ color: "#475569" }}>
-                      {cluster.primary_regions[0]}
+                <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                  <Badge label={c.risk_status} type="status" value={c.risk_status} size="sm" />
+                  {c.primary_regions[0] && (
+                    <span style={{ fontSize: 9, color: "#444", fontFamily: "monospace" }}>
+                      {c.primary_regions[0]}
                     </span>
                   )}
-                  {/* velocity indicator */}
-                  {cluster.velocity > 0.5 && (
-                    <span className="text-[10px] font-mono text-red-400">
-                      ↑ accelerating
-                    </span>
+                  {c.velocity > 0.5 && (
+                    <span style={{ fontSize: 9, color: "#ef4444", fontFamily: "monospace" }}>↑ accel</span>
                   )}
                 </div>
-
-                <p className="text-[10px] font-mono line-clamp-2" style={{ color: "#475569" }}>
-                  {cluster.possible_outcome}
-                </p>
+                {c.possible_outcome && (
+                  <p style={{ fontSize: 10, color: "#444", marginTop: 4, lineHeight: 1.4,
+                    overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any }}>
+                    {c.possible_outcome}
+                  </p>
+                )}
               </div>
-            </div>
-          ))
+            )
+          })
         )}
       </div>
     </div>

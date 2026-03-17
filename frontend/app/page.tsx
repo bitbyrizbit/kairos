@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Navbar } from "@/components/layout/Navbar"
 import { Sidebar } from "@/components/layout/Sidebar"
 import { Ticker } from "@/components/ui/Ticker"
@@ -16,8 +16,8 @@ import { Badge } from "@/components/ui/Badge"
 import { useSignals } from "@/hooks/useSignals"
 import { useKairosScore } from "@/hooks/useKairosScore"
 import { useRipple } from "@/hooks/useRipple"
-import { formatDate, scoreColor } from "@/lib/utils"
 import { api } from "@/lib/api"
+import { scoreColor, formatDate } from "@/lib/utils"
 import type { HistoricalEvent } from "@/types"
 
 type View = "dashboard" | "simulator" | "historical" | "signals" | "report"
@@ -29,16 +29,16 @@ export default function Home() {
   const { data: ripple, loading: rippleLoading, analyze } = useRipple()
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ backgroundColor: "#050b18" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden", backgroundColor: "#080808" }}>
       <Navbar kairosIndex={kairosIndex} />
       <Ticker clusters={signals?.clusters ?? []} />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
         <Sidebar active={view} onChange={setView} />
 
-        <main className="flex-1 overflow-hidden">
+        <div style={{ flex: 1, overflow: "hidden" }}>
           {view === "dashboard" && (
-            <DashboardView
+            <Dashboard
               signals={signals}
               signalsLoading={signalsLoading}
               kairosIndex={kairosIndex}
@@ -51,96 +51,109 @@ export default function Home() {
           {view === "historical" && <HistoricalView />}
           {view === "signals" && <SignalsView signals={signals} loading={signalsLoading} />}
           {view === "report" && <SimulatorPanel mode="analyze" />}
-        </main>
+        </div>
       </div>
     </div>
   )
 }
 
 
-// -- Dashboard --
+// -- Dashboard view --
 
-function DashboardView({ signals, signalsLoading, kairosIndex, ripple, rippleLoading, onAnalyze }: any) {
+function Dashboard({ signals, signalsLoading, kairosIndex, ripple, rippleLoading, onAnalyze }: any) {
   const [query, setQuery] = useState("")
 
-  const handleAnalyze = () => {
-    if (!query.trim()) return
-    onAnalyze(query.trim())
+  const run = () => {
+    const t = query.trim()
+    if (!t || rippleLoading) return
+    onAnalyze(t)
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* top — analyze bar */}
-      <div
-        className="flex items-center gap-3 px-4 py-2.5 flex-shrink-0"
-        style={{ borderBottom: "1px solid #0f1f35" }}
-      >
-        <input
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && handleAnalyze()}
-          placeholder="Enter a disruption event to analyze..."
-          className="flex-1 bg-transparent text-sm font-mono outline-none"
-          style={{ color: "#e2e8f0" }}
-        />
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" }}>
+      {/* analyze bar */}
+      <div style={{
+        display: "flex", alignItems: "center", gap: 10,
+        padding: "8px 16px", borderBottom: "1px solid #141414",
+        backgroundColor: "#080808", flexShrink: 0,
+      }}>
+        <div style={{
+          flex: 1, display: "flex", alignItems: "center",
+          backgroundColor: "#0d0d0d", border: "1px solid #1e1e1e",
+          borderRadius: 5, padding: "0 12px", height: 34,
+        }}>
+          <span style={{ fontSize: 10, color: "#333", fontFamily: "monospace", marginRight: 8, flexShrink: 0 }}>EVENT:</span>
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && run()}
+            placeholder="Enter disruption event — e.g. Taiwan earthquake halts semiconductor production"
+            style={{
+              flex: 1, backgroundColor: "transparent", border: "none", outline: "none",
+              fontSize: 12, color: "#ccc", fontFamily: "monospace",
+            }}
+          />
+        </div>
         <button
-          onClick={handleAnalyze}
+          onClick={run}
           disabled={!query.trim() || rippleLoading}
-          className="px-4 py-1.5 rounded text-xs font-mono font-semibold transition-all flex-shrink-0"
           style={{
-            backgroundColor: !query.trim() || rippleLoading ? "#0f1f35" : "#f59e0b",
-            color: !query.trim() || rippleLoading ? "#334155" : "#050b18",
+            padding: "0 16px", height: 34, borderRadius: 5, border: "none",
+            fontSize: 11, fontWeight: 700, fontFamily: "monospace",
+            cursor: !query.trim() || rippleLoading ? "not-allowed" : "pointer",
+            backgroundColor: !query.trim() || rippleLoading ? "#141414" : "#f59e0b",
+            color: !query.trim() || rippleLoading ? "#333" : "#000",
+            transition: "all 0.15s", flexShrink: 0,
           }}
         >
-          {rippleLoading ? "Analyzing..." : "Analyze →"}
+          {rippleLoading ? "ANALYZING..." : "ANALYZE →"}
         </button>
       </div>
 
-      {/* main grid */}
-      <div className="flex-1 grid overflow-hidden p-3 gap-3" style={{
-        gridTemplateColumns: "260px 1fr 260px",
+      {/* main content — fixed height grid */}
+      <div style={{
+        flex: 1, overflow: "hidden",
+        display: "grid",
+        gridTemplateColumns: "240px 1fr 260px",
         gridTemplateRows: "1fr 1fr",
+        gap: 8, padding: 8,
       }}>
-        {/* left col */}
-        <div className="row-span-2 overflow-hidden">
+        {/* col 1 — risk clusters (spans both rows) */}
+        <div style={{ gridRow: "1 / 3", overflow: "hidden" }}>
           {signalsLoading
-            ? <div className="card h-full"><CardSkeleton rows={8} /></div>
+            ? <div style={{ height: "100%", backgroundColor: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8 }}><CardSkeleton rows={10} /></div>
             : <KairosScorePanel clusters={signals?.clusters ?? []} kairosIndex={kairosIndex} />
           }
         </div>
 
-        {/* center top — ripple graph */}
-        <div className="overflow-hidden">
+        {/* col 2 row 1 — ripple graph */}
+        <div style={{ overflow: "hidden" }}>
           {rippleLoading
-            ? <div className="card h-full flex items-center justify-center"><LoadingPulse message="Tracing cascade..." /></div>
+            ? <div style={{ height: "100%", backgroundColor: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <LoadingPulse message="Tracing cascade..." />
+              </div>
             : <RippleGraph ripple={ripple?.ripple_chain ?? null} isAnimating={!!ripple} />
           }
         </div>
 
-        {/* right col top — crisis timeline */}
-        <div className="overflow-hidden">
+        {/* col 3 row 1 — crisis timeline */}
+        <div style={{ overflow: "hidden" }}>
           <CrisisTimeline
             ripple={ripple?.ripple_chain ?? null}
-            event={ripple?.parsed_event.event_summary ?? ""}
+            event={ripple?.parsed_event?.event_summary ?? ""}
           />
         </div>
 
-        {/* center bottom — world map */}
-        <div className="overflow-hidden">
-          <WorldMap
-            ripple={ripple?.ripple_chain ?? null}
-            clusters={signals?.clusters ?? []}
-          />
+        {/* col 2 row 2 — world map */}
+        <div style={{ overflow: "hidden" }}>
+          <WorldMap ripple={ripple?.ripple_chain ?? null} clusters={signals?.clusters ?? []} />
         </div>
 
-        {/* right col bottom — signal feed */}
-        <div className="overflow-hidden">
+        {/* col 3 row 2 — signal feed */}
+        <div style={{ overflow: "hidden" }}>
           {signalsLoading
-            ? <div className="card h-full"><CardSkeleton rows={6} /></div>
-            : <SignalFeed
-                clusters={signals?.clusters ?? []}
-                lastUpdated={signals?.last_updated ?? ""}
-              />
+            ? <div style={{ height: "100%", backgroundColor: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8 }}><CardSkeleton rows={8} /></div>
+            : <SignalFeed clusters={signals?.clusters ?? []} lastUpdated={signals?.last_updated ?? ""} />
           }
         </div>
       </div>
@@ -149,76 +162,47 @@ function DashboardView({ signals, signalsLoading, kairosIndex, ripple, rippleLoa
 }
 
 
-// -- Historical --
+// -- Historical view --
 
 function HistoricalView() {
   const [events, setEvents] = useState<HistoricalEvent[] | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState<HistoricalEvent | null>(null)
-  const [loaded, setLoaded] = useState(false)
 
-  const load = async () => {
-    if (loaded) return
-    setLoading(true)
-    try {
-      const res = await api.historical()
-      setEvents(res.events)
-      setLoaded(true)
-    } catch {
-      setEvents([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // load on mount
-  useState(() => { load() })
+  useEffect(() => {
+    api.historical().then(r => {
+      setEvents(r.events)
+      if (r.events.length) setSelected(r.events[0])
+    }).catch(() => setEvents([])).finally(() => setLoading(false))
+  }, [])
 
   return (
-    <div className="flex h-full overflow-hidden">
-      {/* event list */}
-      <div
-        className="w-72 flex-shrink-0 flex flex-col overflow-hidden"
-        style={{ borderRight: "1px solid #0f1f35" }}
-      >
-        <div
-          className="px-4 py-3 flex-shrink-0"
-          style={{ borderBottom: "1px solid #0f1f35" }}
-        >
-          <p className="text-xs font-mono font-semibold tracking-wider uppercase" style={{ color: "#94a3b8" }}>
-            Historical Validation
-          </p>
-          <p className="text-[10px] font-mono mt-1" style={{ color: "#334155" }}>
-            Events KAIROS would have predicted
-          </p>
+    <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
+      {/* list */}
+      <div style={{ width: 260, flexShrink: 0, borderRight: "1px solid #141414", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div style={{ padding: "12px 16px", borderBottom: "1px solid #141414", flexShrink: 0 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#555", letterSpacing: "0.15em" }}>HISTORICAL VALIDATION</div>
+          <div style={{ fontSize: 10, color: "#333", marginTop: 3 }}>Events KAIROS would have predicted</div>
         </div>
-
-        <div className="flex-1 overflow-y-auto">
+        <div style={{ flex: 1, overflowY: "auto" }}>
           {loading && <CardSkeleton rows={6} />}
-          {events?.map(event => (
+          {events?.map(e => (
             <button
-              key={event.id}
-              onClick={() => setSelected(event)}
-              className="w-full text-left px-4 py-3 card-hover"
+              key={e.id}
+              onClick={() => setSelected(e)}
               style={{
-                borderBottom: "1px solid #0a1628",
-                backgroundColor: selected?.id === event.id ? "#0a1628" : "transparent",
-                borderLeft: selected?.id === event.id ? "2px solid #f59e0b" : "2px solid transparent",
+                width: "100%", textAlign: "left", padding: "12px 16px",
+                backgroundColor: selected?.id === e.id ? "#0d0d0d" : "transparent",
+                borderLeft: selected?.id === e.id ? "2px solid #f59e0b" : "2px solid transparent",
+                borderBottom: "1px solid #0f0f0f", border: "none", cursor: "pointer",
               }}
             >
-              <p className="text-xs font-semibold" style={{ color: "#e2e8f0" }}>
-                {event.name}
-              </p>
-              <p className="text-[10px] font-mono mt-1" style={{ color: "#475569" }}>
-                {formatDate(event.date)}
-              </p>
-              <div className="flex items-center gap-2 mt-1.5">
-                <ScoreRing score={event.kairos_score_at_detection} size={28} showLabel={false} />
-                <span
-                  className="text-[10px] font-mono"
-                  style={{ color: "#22c55e" }}
-                >
-                  {event.days_before_mainstream_news}d before news
+              <div style={{ fontSize: 11, fontWeight: 600, color: "#ccc", marginBottom: 4 }}>{e.name}</div>
+              <div style={{ fontSize: 9, color: "#444", fontFamily: "monospace", marginBottom: 6 }}>{formatDate(e.date)}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <ScoreRing score={e.kairos_score_at_detection} size={28} showLabel={false} />
+                <span style={{ fontSize: 10, color: "#22c55e", fontFamily: "monospace" }}>
+                  {e.days_before_mainstream_news}d early
                 </span>
               </div>
             </button>
@@ -226,89 +210,56 @@ function HistoricalView() {
         </div>
       </div>
 
-      {/* event detail */}
-      <div className="flex-1 overflow-y-auto p-4">
+      {/* detail */}
+      <div style={{ flex: 1, overflowY: "auto", padding: 20 }}>
         {!selected ? (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-xs font-mono" style={{ color: "#334155" }}>
-              Select an event to see what KAIROS detected
-            </p>
+          <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontSize: 12, color: "#333" }}>Select an event</span>
           </div>
         ) : (
-          <div className="flex flex-col gap-4 animate-fade-in max-w-3xl">
-            <div className="flex items-start justify-between gap-4">
+          <div style={{ display: "flex", flexDirection: "column", gap: 14, maxWidth: 720, animation: "fade-up 0.3s ease-out" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
               <div>
-                <h2 className="text-base font-semibold" style={{ color: "#e2e8f0" }}>
-                  {selected.name}
-                </h2>
-                <p className="text-xs font-mono mt-0.5" style={{ color: "#475569" }}>
-                  {formatDate(selected.date)}
-                </p>
+                <h2 style={{ fontSize: 16, fontWeight: 700, color: "#e0e0e0", marginBottom: 4 }}>{selected.name}</h2>
+                <p style={{ fontSize: 11, color: "#444", fontFamily: "monospace" }}>{formatDate(selected.date)}</p>
               </div>
-              <div className="flex items-center gap-3 flex-shrink-0">
-                <ScoreRing score={selected.kairos_score_at_detection} size={56} />
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
+                <ScoreRing score={selected.kairos_score_at_detection} size={60} />
                 <div>
-                  <p className="text-[10px] font-mono" style={{ color: "#475569" }}>
-                    Kairos would have flagged this
-                  </p>
-                  <p
-                    className="text-sm font-bold font-mono"
-                    style={{ color: "#22c55e" }}
-                  >
-                    {selected.days_before_mainstream_news} days early
-                  </p>
+                  <div style={{ fontSize: 10, color: "#444", marginBottom: 3 }}>Flagged</div>
+                  <div style={{ fontSize: 18, fontWeight: 900, color: "#22c55e", fontFamily: "monospace" }}>
+                    {selected.days_before_mainstream_news}d
+                  </div>
+                  <div style={{ fontSize: 9, color: "#444" }}>before news</div>
                 </div>
               </div>
             </div>
 
-            {/* what kairos saw */}
-            <div
-              className="card p-4"
-              style={{ borderColor: "#22c55e33" }}
-            >
-              <p className="text-[10px] font-mono uppercase tracking-wider mb-2" style={{ color: "#22c55e" }}>
-                What KAIROS detected
-              </p>
-              <p className="text-xs leading-relaxed" style={{ color: "#94a3b8" }}>
-                {selected.what_kairos_would_have_seen}
-              </p>
+            <div style={{ padding: 14, borderRadius: 6, backgroundColor: "#0a1a0a", border: "1px solid #22c55e22" }}>
+              <div style={{ fontSize: 9, color: "#22c55e", letterSpacing: "0.15em", marginBottom: 8 }}>WHAT KAIROS DETECTED</div>
+              <p style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>{selected.what_kairos_would_have_seen}</p>
             </div>
 
-            {/* actual impact */}
-            <div className="card p-4">
-              <p className="text-[10px] font-mono uppercase tracking-wider mb-2" style={{ color: "#475569" }}>
-                Actual Impact
-              </p>
-              <p className="text-xs leading-relaxed" style={{ color: "#94a3b8" }}>
-                {selected.actual_impact}
-              </p>
+            <div style={{ padding: 14, borderRadius: 6, backgroundColor: "#0d0d0d", border: "1px solid #1a1a1a" }}>
+              <div style={{ fontSize: 9, color: "#444", letterSpacing: "0.15em", marginBottom: 8 }}>ACTUAL IMPACT</div>
+              <p style={{ fontSize: 12, color: "#888", lineHeight: 1.6 }}>{selected.actual_impact}</p>
             </div>
 
-            {/* ripple graph if available */}
             {selected.ripple_chain && (
-              <div style={{ height: 280 }}>
+              <div style={{ height: 300 }}>
                 <RippleGraph ripple={selected.ripple_chain} isAnimating={false} />
               </div>
             )}
 
-            {/* affected nodes */}
-            <div className="card p-4">
-              <p className="text-[10px] font-mono uppercase tracking-wider mb-2" style={{ color: "#475569" }}>
-                Nodes Affected
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {selected.nodes_affected.map(node => (
-                  <span
-                    key={node}
-                    className="px-2 py-0.5 rounded text-[10px] font-mono"
-                    style={{
-                      backgroundColor: "#0a1628",
-                      border: "1px solid #1e3a5f",
-                      color: "#64748b",
-                    }}
-                  >
-                    {node}
-                  </span>
+            <div style={{ padding: 14, borderRadius: 6, backgroundColor: "#0d0d0d", border: "1px solid #1a1a1a" }}>
+              <div style={{ fontSize: 9, color: "#444", letterSpacing: "0.15em", marginBottom: 8 }}>NODES AFFECTED</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {selected.nodes_affected.map(n => (
+                  <span key={n} style={{
+                    padding: "3px 8px", borderRadius: 3, fontSize: 10,
+                    fontFamily: "monospace", backgroundColor: "#141414",
+                    border: "1px solid #1e1e1e", color: "#666",
+                  }}>{n}</span>
                 ))}
               </div>
             </div>
@@ -323,62 +274,55 @@ function HistoricalView() {
 // -- Signals view --
 
 function SignalsView({ signals, loading }: any) {
-  if (loading) return <div className="p-4"><LoadingPulse message="Fetching signals..." /></div>
+  if (loading) return <div style={{ padding: 20 }}><LoadingPulse message="Fetching signals..." /></div>
   if (!signals) return null
 
   return (
-    <div className="flex flex-col h-full overflow-hidden p-4 gap-4">
-      <div className="flex items-center justify-between">
+    <div style={{ height: "100%", overflowY: "auto", padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <h2 className="text-sm font-semibold" style={{ color: "#e2e8f0" }}>Global Signal Feed</h2>
-          <p className="text-xs mt-0.5" style={{ color: "#475569" }}>
-            {signals.total_signals_processed} signals processed · {signals.clusters.length} clusters detected
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: "#e0e0e0", marginBottom: 4 }}>Global Signal Feed</h2>
+          <p style={{ fontSize: 11, color: "#444" }}>
+            {signals.total_signals_processed} signals processed · {signals.clusters.length} clusters
           </p>
         </div>
-        <ScoreRing score={signals.kairos_index.index_value} size={52} />
+        <ScoreRing score={signals.kairos_index.index_value} size={54} />
       </div>
 
-      <div className="flex-1 overflow-y-auto grid gap-3"
-        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", alignContent: "start" }}
-      >
-        {signals.clusters.map((cluster: any) => (
-          <div key={cluster.cluster_id} className="card p-4 flex flex-col gap-2">
-            <div className="flex items-start justify-between gap-2">
-              <p className="text-xs font-semibold" style={{ color: "#e2e8f0" }}>
-                {cluster.theme}
-              </p>
-              <span
-                className="text-sm font-black font-mono flex-shrink-0"
-                style={{ color: scoreColor(cluster.kairos_score) }}
-              >
-                {cluster.kairos_score}
-              </span>
+      <div style={{
+        display: "grid", gap: 10,
+        gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+      }}>
+        {signals.clusters.map((c: any) => {
+          const color = scoreColor(c.kairos_score)
+          return (
+            <div key={c.cluster_id} style={{
+              padding: 14, borderRadius: 6,
+              backgroundColor: "#0a0a0a", border: "1px solid #1a1a1a",
+              borderLeft: `2px solid ${color}`,
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 8 }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: "#ddd", lineHeight: 1.3 }}>{c.theme}</p>
+                <span style={{ fontSize: 18, fontWeight: 900, color, fontFamily: "monospace", flexShrink: 0 }}>{c.kairos_score}</span>
+              </div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 8 }}>
+                <Badge label={c.risk_status} type="status" value={c.risk_status} size="sm" />
+                {c.velocity > 0.5 && <span style={{ fontSize: 9, color: "#ef4444", fontFamily: "monospace" }}>↑ accelerating</span>}
+                <span style={{ fontSize: 9, color: "#333", fontFamily: "monospace" }}>{c.signal_count} signals</span>
+              </div>
+              <p style={{ fontSize: 10, color: "#444", lineHeight: 1.4 }}>{c.possible_outcome}</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 8 }}>
+                {c.primary_regions.map((r: string) => (
+                  <span key={r} style={{
+                    fontSize: 9, padding: "2px 6px", borderRadius: 3,
+                    backgroundColor: "#141414", border: "1px solid #1e1e1e", color: "#555",
+                    fontFamily: "monospace",
+                  }}>{r}</span>
+                ))}
+              </div>
             </div>
-
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge label={cluster.risk_status} type="status" value={cluster.risk_status} size="sm" />
-              {cluster.velocity > 0.5 && (
-                <span className="text-[10px] font-mono text-red-400">↑ accelerating</span>
-              )}
-              <span className="text-[10px] font-mono" style={{ color: "#334155" }}>
-                {cluster.signal_count} signals
-              </span>
-            </div>
-
-            <p className="text-[10px] font-mono" style={{ color: "#475569" }}>
-              {cluster.possible_outcome}
-            </p>
-
-            <div className="flex flex-wrap gap-1 mt-1">
-              {cluster.primary_regions.map((r: string) => (
-                <span key={r} className="text-[10px] font-mono px-1.5 py-0.5 rounded"
-                  style={{ backgroundColor: "#0a1628", color: "#475569", border: "1px solid #0f1f35" }}>
-                  {r}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
