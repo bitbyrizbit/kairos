@@ -1,7 +1,6 @@
 """
 historical.py
 Pre-loaded past crisis events for validation mode.
-Hardcoded here intentionally — these are curated demo scenarios, not user data.
 """
 
 from fastapi import APIRouter
@@ -10,14 +9,12 @@ from app.services import ripple_engine
 
 router = APIRouter()
 
-# the three events we use in the demo
-# dates reflect when early signals were detectable, not when crisis hit mainstream news
 _EVENTS = [
     {
         "id": "covid_2020",
         "name": "COVID-19 Supply Chain Collapse",
         "date": "2020-01-15",
-        "description": "Unusual pneumonia cluster in Wuhan, China causing factory shutdowns and port delays",
+        "description": "Unusual pneumonia cluster in Wuhan causing factory shutdowns and port delays",
         "what_kairos_would_have_seen": "Spike in signals around Wuhan factory closures, unusual PPE procurement, port congestion at Shanghai — 18 days before WHO declared emergency",
         "kairos_score_at_detection": 67,
         "days_before_mainstream_news": 18,
@@ -31,7 +28,7 @@ _EVENTS = [
         "name": "Suez Canal Blockage",
         "date": "2021-03-23",
         "description": "Ever Given container ship runs aground blocking the Suez Canal entirely",
-        "what_kairos_would_have_seen": "High winds forecast + heavy container vessel traffic through canal — risk flagged 6 hours before grounding",
+        "what_kairos_would_have_seen": "High winds forecast + heavy vessel traffic — risk flagged 6 hours before grounding",
         "kairos_score_at_detection": 74,
         "days_before_mainstream_news": 0,
         "actual_impact": "$9.6 billion per day in delayed trade. 369 vessels stuck for 6 days.",
@@ -58,12 +55,12 @@ _EVENTS = [
 @router.get("/historical", response_model=HistoricalResponse)
 async def get_historical():
     events = []
-    for e in _EVENTS:
-        origin = e.pop("origin_node")
-        severity = e.pop("severity")
+    for raw in _EVENTS:
+        # don't mutate the original dict — copy it first
+        e = {k: v for k, v in raw.items() if k not in ("origin_node", "severity")}
+        origin = raw["origin_node"]
+        severity = raw["severity"]
 
-        # run the actual ripple engine on each historical event
-        # so the graph visualization works the same way as live events
         try:
             ripple = ripple_engine.run_ripple(origin, severity, e["description"])
         except Exception:

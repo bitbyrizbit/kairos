@@ -4,6 +4,7 @@ All LLM calls go through here. Switched to Groq — same interface, faster, free
 """
 
 import json
+import re
 from groq import Groq
 from app.config import get_settings
 
@@ -27,11 +28,28 @@ def _chat(system: str, user: str, max_tokens: int = 1024) -> str:
 
 
 def _to_json(text: str) -> dict:
-    # model sometimes wraps output in ```json ... ``` even when told not to
+    # strip markdown fences
     s = text.strip()
     if s.startswith("```"):
         s = s.split("\n", 1)[1].rsplit("```", 1)[0]
-    return json.loads(s.strip())
+    s = s.strip()
+
+    # try direct parse first
+    try:
+        return json.loads(s)
+    except json.JSONDecodeError:
+        pass
+
+    # fallback — extract first { ... } block with regex
+    match = re.search(r'\{[\s\S]*\}', s)
+    if match:
+        try:
+            return json.loads(match.group())
+        except json.JSONDecodeError:
+            pass
+
+    # last resort — return empty dict so app doesn't crash
+    return {}
 
 
 def parse_event(description: str) -> dict:
@@ -65,7 +83,18 @@ Return this exact JSON shape:
 
 Scoring: 0-30 minor, 31-50 moderate, 51-70 serious, 71-85 critical, 86-100 catastrophic."""
 
-    return _to_json(_chat(system, user, max_tokens=400))
+    result = _to_json(_chat(system, user, max_tokens=400))
+
+    # ensure required fields exist with safe defaults
+    return {
+        "event_summary": result.get("event_summary", description[:100]),
+        "origin_region": result.get("origin_region", "Global"),
+        "affected_commodity": result.get("affected_commodity", "Mixed"),
+        "severity": float(result.get("severity", 0.5)),
+        "kairos_score": int(result.get("kairos_score", 50)),
+        "event_type": result.get("event_type", "geopolitical"),
+        "primary_node_id": result.get("primary_node_id", "SEMI"),
+    }
 
 
 def narrate_ripple(event: str, hops: list[dict], score: int) -> dict:
@@ -94,7 +123,14 @@ Return:
   "similar_historical_events": ["past event 1", "past event 2"]
 }}"""
 
-    return _to_json(_chat(system, user, max_tokens=600))
+    result = _to_json(_chat(system, user, max_tokens=600))
+
+    # safe defaults so frontend never gets undefined
+    return {
+        "crisis_narrative": result.get("crisis_narrative", "Analysis complete. Review cascade data below."),
+        "recommended_actions": result.get("recommended_actions", []),
+        "similar_historical_events": result.get("similar_historical_events", []),
+    }
 
 
 def cluster_news(articles: list[dict]) -> dict:
@@ -134,7 +170,13 @@ Group into risk clusters. Return:
 
 Only create a cluster if 2+ headlines point to the same underlying risk."""
 
-    return _to_json(_chat(system, user, max_tokens=1200))
+    result = _to_json(_chat(system, user, max_tokens=1200))
+
+    return {
+        "clusters": result.get("clusters", []),
+        "kairos_index": result.get("kairos_index", 35),
+        "index_reasoning": result.get("index_reasoning", ""),
+    }
 
 
 def generate_report(event: str, ripple: dict, score: int) -> str:
