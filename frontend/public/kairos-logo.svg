@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#0e0e0e"/>
+      <stop offset="100%" stop-color="#040404"/>
+    </radialGradient>
+    <radialGradient id="gr" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ef4444" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="ga" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="go" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f97316" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="gg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#22c55e" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="400" height="400" rx="72" fill="url(#bg)"/>
+
+  <!-- subtle ambient glow behind the K -->
+  <ellipse cx="200" cy="200" rx="160" ry="155" fill="#f59e0b" opacity="0.03"/>
+
+  <!--
+    FAT K — thick connections, big nodes, bold presence
+    Spine: x=118, nodes from y=52 to y=348
+    Upper arm: sweeps from spine-middle (118,200) up to (318,72)
+    Lower arm: sweeps from spine-middle (118,200) down to (318,328)
+  -->
+
+  <!-- ===== SPINE CONNECTIONS — thick ===== -->
+  <line x1="118" y1="72"  x2="118" y2="168" stroke="#f59e0b" stroke-width="7" stroke-linecap="round" opacity="0.7"/>
+  <line x1="118" y1="168" x2="118" y2="200" stroke="#f97316" stroke-width="7" stroke-linecap="round" opacity="0.7"/>
+  <line x1="118" y1="200" x2="118" y2="232" stroke="#f97316" stroke-width="7" stroke-linecap="round" opacity="0.7"/>
+  <line x1="118" y1="232" x2="118" y2="328" stroke="#f59e0b" stroke-width="7" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- ===== UPPER ARM CONNECTIONS — thick red ===== -->
+  <line x1="118" y1="200" x2="188" y2="156" stroke="#ef4444" stroke-width="7" stroke-linecap="round" opacity="0.75"/>
+  <line x1="188" y1="156" x2="252" y2="116" stroke="#ef4444" stroke-width="7" stroke-linecap="round" opacity="0.75"/>
+  <line x1="252" y1="116" x2="318" y2="72"  stroke="#ef4444" stroke-width="7" stroke-linecap="round" opacity="0.75"/>
+
+  <!-- ===== LOWER ARM CONNECTIONS — thick green/amber ===== -->
+  <line x1="118" y1="200" x2="188" y2="244" stroke="#22c55e" stroke-width="7" stroke-linecap="round" opacity="0.7"/>
+  <line x1="188" y1="244" x2="252" y2="284" stroke="#f59e0b" stroke-width="7" stroke-linecap="round" opacity="0.7"/>
+  <line x1="252" y1="284" x2="318" y2="328" stroke="#f97316" stroke-width="7" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- ===== SPINE NODES ===== -->
+  <!-- S1 top -->
+  <circle cx="118" cy="72"  r="36" fill="url(#ga)" opacity="0.2"/>
+  <circle cx="118" cy="72"  r="20" fill="url(#ga)" opacity="0.4"/>
+  <circle cx="118" cy="72"  r="11" fill="#f59e0b"/>
+  <circle cx="118" cy="72"  r="11" fill="none" stroke="#f59e0b22" stroke-width="6"/>
+
+  <!-- S2 upper-mid -->
+  <circle cx="118" cy="168" r="28" fill="url(#go)" opacity="0.2"/>
+  <circle cx="118" cy="168" r="15" fill="url(#go)" opacity="0.4"/>
+  <circle cx="118" cy="168" r="9"  fill="#f97316"/>
+
+  <!-- S3 CENTER — biggest, junction, amber -->
+  <circle cx="118" cy="200" r="52" fill="url(#ga)" opacity="0.12"/>
+  <circle cx="118" cy="200" r="34" fill="url(#ga)" opacity="0.22"/>
+  <circle cx="118" cy="200" r="18" fill="url(#ga)" opacity="0.5"/>
+  <circle cx="118" cy="200" r="14" fill="#f59e0b"/>
+  <circle cx="118" cy="200" r="14" fill="none" stroke="#f59e0b" stroke-width="1.5" opacity="0.4"/>
+  <circle cx="118" cy="200" r="28" fill="none" stroke="#f59e0b" stroke-width="0.8" opacity="0.2" stroke-dasharray="5 4"/>
+
+  <!-- S4 lower-mid -->
+  <circle cx="118" cy="232" r="28" fill="url(#go)" opacity="0.2"/>
+  <circle cx="118" cy="232" r="15" fill="url(#go)" opacity="0.4"/>
+  <circle cx="118" cy="232" r="9"  fill="#f97316"/>
+
+  <!-- S5 bottom -->
+  <circle cx="118" cy="328" r="36" fill="url(#ga)" opacity="0.2"/>
+  <circle cx="118" cy="328" r="20" fill="url(#ga)" opacity="0.4"/>
+  <circle cx="118" cy="328" r="11" fill="#f59e0b"/>
+  <circle cx="118" cy="328" r="11" fill="none" stroke="#f59e0b22" stroke-width="6"/>
+
+  <!-- ===== UPPER ARM NODES ===== -->
+  <!-- U1 -->
+  <circle cx="188" cy="156" r="32" fill="url(#gr)" opacity="0.2"/>
+  <circle cx="188" cy="156" r="18" fill="url(#gr)" opacity="0.4"/>
+  <circle cx="188" cy="156" r="10" fill="#ef4444"/>
+
+  <!-- U2 -->
+  <circle cx="252" cy="116" r="36" fill="url(#gr)" opacity="0.22"/>
+  <circle cx="252" cy="116" r="20" fill="url(#gr)" opacity="0.45"/>
+  <circle cx="252" cy="116" r="12" fill="#ef4444"/>
+  <circle cx="252" cy="116" r="12" fill="none" stroke="#ef444433" stroke-width="6"/>
+
+  <!-- U3 tip — biggest red, most critical -->
+  <circle cx="318" cy="72"  r="52" fill="url(#gr)" opacity="0.14"/>
+  <circle cx="318" cy="72"  r="36" fill="url(#gr)" opacity="0.24"/>
+  <circle cx="318" cy="72"  r="22" fill="url(#gr)" opacity="0.5"/>
+  <circle cx="318" cy="72"  r="16" fill="#ef4444"/>
+  <circle cx="318" cy="72"  r="16" fill="none" stroke="#ef4444" stroke-width="2" opacity="0.5"/>
+  <circle cx="318" cy="72"  r="28" fill="none" stroke="#ef4444" stroke-width="0.8" opacity="0.25" stroke-dasharray="5 4"/>
+  <circle cx="318" cy="72"  r="42" fill="none" stroke="#ef4444" stroke-width="0.5" opacity="0.12" stroke-dasharray="4 5"/>
+
+  <!-- ===== LOWER ARM NODES ===== -->
+  <!-- L1 -->
+  <circle cx="188" cy="244" r="32" fill="url(#gg)" opacity="0.2"/>
+  <circle cx="188" cy="244" r="18" fill="url(#gg)" opacity="0.4"/>
+  <circle cx="188" cy="244" r="10" fill="#22c55e"/>
+
+  <!-- L2 -->
+  <circle cx="252" cy="284" r="36" fill="url(#ga)" opacity="0.22"/>
+  <circle cx="252" cy="284" r="20" fill="url(#ga)" opacity="0.45"/>
+  <circle cx="252" cy="284" r="12" fill="#f59e0b"/>
+  <circle cx="252" cy="284" r="12" fill="none" stroke="#f59e0b33" stroke-width="6"/>
+
+  <!-- L3 tip — bottom right -->
+  <circle cx="318" cy="328" r="52" fill="url(#go)" opacity="0.14"/>
+  <circle cx="318" cy="328" r="36" fill="url(#go)" opacity="0.22"/>
+  <circle cx="318" cy="328" r="22" fill="url(#go)" opacity="0.45"/>
+  <circle cx="318" cy="328" r="16" fill="#f97316"/>
+  <circle cx="318" cy="328" r="16" fill="none" stroke="#f97316" stroke-width="2" opacity="0.5"/>
+  <circle cx="318" cy="328" r="28" fill="none" stroke="#f97316" stroke-width="0.8" opacity="0.22" stroke-dasharray="5 4"/>
+
+</svg>
