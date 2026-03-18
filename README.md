@@ -1,12 +1,3 @@
-<div align="center">
-
-<br/>
-
-<img src="assets/banner.svg" alt="KAIROS Banner" width="100%"/>
-
-<br/>
-<br/>
-
 # KAIROS
 ### *Foresee the moment. Before the world breaks.*
 
@@ -33,6 +24,16 @@
 </div>
 
 ---
+
+<div align="center">
+
+<br/>
+
+<img src="assets/banner.svg" alt="KAIROS Banner" width="100%"/>
+
+<br/>
+<br/>
+
 
 ## The Problem
 
@@ -80,12 +81,12 @@ KAIROS is a real-time global crisis intelligence platform with three core layers
 ┌──────────────────────────────────────────────────────────────┐
 │                          KAIROS                              │
 │                                                              │
-│   NewsAPI ──► Signal Harvester ──► LLM Clustering           │
+│   NewsAPI ──► Signal Harvester ──► LLM Clustering            │
 │                                         │                    │
 │                                    Risk Clusters             │
 │                                    Kairos Score™             │
 │                                         │                    │
-│   User Event ──► Event Parser ──► Ripple Engine ──► Output  │
+│   User Event ──► Event Parser ──► Ripple Engine ──► Output   │
 │                       │               │                      │
 │                  LLM Extraction   Knowledge Graph            │
 │                                   100 nodes · 180 edges      │
@@ -93,16 +94,16 @@ KAIROS is a real-time global crisis intelligence platform with three core layers
 └──────────────────────────────────────────────────────────────┘
                               │
                ┌──────────────▼──────────────┐
-               │       FastAPI Backend        │
-               │   REST API — 5 endpoints     │
-               │   Railway · Production       │
+               │       FastAPI Backend       │
+               │   REST API — 5 endpoints    │
+               │   Railway · Production      │
                └──────────────┬──────────────┘
                               │
                ┌──────────────▼──────────────┐
-               │     Next.js 14 Frontend      │
-               │   Dashboard · Simulator      │
-               │   Historical · Signals       │
-               │   Vercel · Production        │
+               │     Next.js 14 Frontend     │
+               │   Dashboard · Simulator     │
+               │   Historical · Signals      │
+               │   Vercel · Production       │
                └─────────────────────────────┘
 ```
 
