@@ -19,9 +19,9 @@
 
 <br/>
 
-🌐 **Live Demo** → `[deployment link coming soon]`
+🌐 **Live Demo** → https://kairos-gules.vercel.app
 &nbsp;&nbsp;|&nbsp;&nbsp;
-📡 **API** → `[api link coming soon]`
+📡 **API** → https://kairos-production-a30d.up.railway.app
 
 <br/>
 

@@ -43,7 +43,7 @@ export function Navbar({ kairosIndex }: Props) {
       }}
     >
       {/* logo */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <a href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", cursor: "pointer" }}>
         <div style={{
           width: 28, height: 28, borderRadius: 6,
           backgroundColor: "#f59e0b",
@@ -67,7 +67,7 @@ export function Navbar({ kairosIndex }: Props) {
             CRISIS INTELLIGENCE
           </div>
         </div>
-      </div>
+      </a>
 
       {/* foresight index */}
       {kairosIndex && (
