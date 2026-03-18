@@ -12,7 +12,14 @@ export function Navbar({ kairosIndex }: Props) {
   const [time, setTime] = useState("")
 
   useEffect(() => {
-    const tick = () => setTime(new Date().toUTCString().slice(17, 25) + " UTC")
+    const tick = () => {
+  const now = new Date()
+  const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000))
+  const hh = String(ist.getUTCHours()).padStart(2, "0")
+  const mm = String(ist.getUTCMinutes()).padStart(2, "0")
+  const ss = String(ist.getUTCSeconds()).padStart(2, "0")
+  setTime(`${hh}:${mm}:${ss} IST`)
+}
     tick()
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)

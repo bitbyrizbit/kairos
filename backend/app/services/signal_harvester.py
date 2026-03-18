@@ -73,7 +73,7 @@ async def fetch_articles() -> list[dict]:
                 "https://newsapi.org/v2/everything",
                 params={
                     "apiKey": settings.news_api_key,
-                    "q": "supply chain OR semiconductor OR oil prices OR trade war OR shipping",
+                    "q": "supply chain OR semiconductor OR oil OR grain OR sanctions OR conflict OR port OR shortage OR tariff OR drought OR earthquake OR inflation OR commodity OR logistics OR trade",
                     "language": "en",
                     "sortBy": "publishedAt",
                     "pageSize": 30,
@@ -149,7 +149,7 @@ async def get_signals() -> dict:
             for a in cluster_articles
         ]
 
-        # 🔥 deduplicate signals by normalized headline
+        # deduplicate signals by normalized headline
         seen_headlines = set()
         unique_signals = []
 

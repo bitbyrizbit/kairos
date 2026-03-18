@@ -3,7 +3,10 @@ import "./globals.css"
 
 export const metadata: Metadata = {
   title: "KAIROS — Crisis Intelligence",
-  description: "Real-time global crisis intelligence platform.",
+  description: "Real-time global crisis intelligence. Detects weak signals, predicts cascading supply chain failures before they happen.",
+  icons: {
+    icon: "/favicon.svg",
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

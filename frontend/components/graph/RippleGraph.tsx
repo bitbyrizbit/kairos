@@ -62,10 +62,10 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
             selector: "node",
             style: {
               "background-color": (ele: any) => {
-                const t = ele.data("type")
-                if (t === "origin") return "#f59e0b"
-                return impactColor(t) + "22"
-              },
+  const t = ele.data("type")
+  if (t === "origin") return "#f59e0b"
+  return "#1a1a1a"
+},
               "border-color": (ele: any) => {
                 const t = ele.data("type")
                 if (t === "origin") return "#f59e0b"
@@ -95,16 +95,17 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
             }
           },
           {
-            selector: "edge",
-            style: {
-              "width": 1.5,
-              "line-color": (ele: any) => impactColor(ele.data("impact")) + "44",
-              "target-arrow-color": (ele: any) => impactColor(ele.data("impact")) + "88",
-              "target-arrow-shape": "triangle",
-              "curve-style": "bezier",
-              "arrow-scale": 0.7,
-            }
-          },
+  selector: "edge",
+  style: {
+    "width": 1.5,
+    "line-color": "#2a2a2a",
+    "target-arrow-color": "#444444",
+    "target-arrow-shape": "triangle",
+    "curve-style": "bezier",
+    "arrow-scale": 0.7,
+    "opacity": 0.6,
+  }
+},
         ],
         layout: {
           name: "breadthfirst",

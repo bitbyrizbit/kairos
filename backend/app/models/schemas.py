@@ -37,7 +37,7 @@ class NodeType(str, Enum):
 class AnalyzeEventRequest(BaseModel):
     description: str = Field(
         ...,
-        min_length=10,
+        min_length=3,
         max_length=500,
         examples=["Taiwan semiconductor production drops 30% due to earthquake"]
     )
@@ -45,7 +45,7 @@ class AnalyzeEventRequest(BaseModel):
 class SimulateRequest(BaseModel):
     description: str = Field(
         ...,
-        min_length=10,
+        min_length=3,
         max_length=500,
     )
     is_hypothetical: bool = True

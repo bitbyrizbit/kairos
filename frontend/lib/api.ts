@@ -14,9 +14,9 @@ const http = axios.create({
 
 export const api = {
   analyze: async (description: string): Promise<AnalyzeResponse> => {
-    const res = await http.post("/analyze", { description })
-    return res.data
-  },
+  const res = await http.post("/analyze", { description })
+  return res.data
+},
 
   simulate: async (description: string): Promise<AnalyzeResponse> => {
     const res = await http.post("/simulate", { description, is_hypothetical: true })
