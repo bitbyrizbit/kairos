@@ -23,14 +23,8 @@
 </div>
 
 ---
-<br/>
-
-<br/>
 
 <img src="assets/banner.svg" alt="KAIROS Banner" width="100%"/>
-
-<br/>
-<br/>
 
 
 ## The Problem
