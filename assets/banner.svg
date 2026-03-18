@@ -1,0 +1,264 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400">
+<defs>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=JetBrains+Mono:wght@400;700&amp;display=swap');
+  </style>
+  <radialGradient id="bg" cx="22%" cy="50%" r="60%">
+    <stop offset="0%" stop-color="#16120a"/>
+    <stop offset="100%" stop-color="#060606"/>
+  </radialGradient>
+  <radialGradient id="glow" cx="22%" cy="50%" r="45%">
+    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.10"/>
+    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="na" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.75"/>
+    <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="nr" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#ef4444" stop-opacity="0.75"/>
+    <stop offset="100%" stop-color="#ef4444" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="ng" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#22c55e" stop-opacity="0.75"/>
+    <stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
+  </radialGradient>
+  <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+    <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#0d0d0d" stroke-width="0.6"/>
+  </pattern>
+  <linearGradient id="kGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%"   stop-color="#fff1aa"/>
+    <stop offset="35%"  stop-color="#f8c435"/>
+    <stop offset="70%"  stop-color="#d97706"/>
+    <stop offset="100%" stop-color="#92400e"/>
+  </linearGradient>
+  <linearGradient id="kStroke" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%"   stop-color="#fde68a" stop-opacity="0.6"/>
+    <stop offset="100%" stop-color="#78350f"  stop-opacity="0.2"/>
+  </linearGradient>
+  <pattern id="scanlines" width="1" height="4" patternUnits="userSpaceOnUse">
+    <rect width="1" height="1" y="0" fill="black" fill-opacity="0.18"/>
+  </pattern>
+  <mask id="kMask">
+    <text x="195" y="224"
+      font-family="'Bebas Neue','Impact','Arial Narrow',sans-serif"
+      font-size="96" letter-spacing="8" fill="white">KAIROS</text>
+  </mask>
+  <linearGradient id="sGold" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%"   stop-color="#fde68a"/>
+    <stop offset="100%" stop-color="#d97706"/>
+  </linearGradient>
+  <linearGradient id="sRed" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%"   stop-color="#fca5a5"/>
+    <stop offset="100%" stop-color="#dc2626"/>
+  </linearGradient>
+  <linearGradient id="sGreen" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%"   stop-color="#86efac"/>
+    <stop offset="100%" stop-color="#16a34a"/>
+  </linearGradient>
+</defs>
+
+<!-- Base layers -->
+<rect width="1200" height="400" fill="url(#bg)"/>
+<rect width="1200" height="400" fill="url(#grid)"/>
+<rect width="1200" height="400" fill="url(#glow)"/>
+<rect x="0" y="0"     width="1200" height="1.5" fill="#f59e0b" opacity="0.55"/>
+<rect x="0" y="398.5" width="1200" height="1.5" fill="#f59e0b" opacity="0.18"/>
+
+<!-- ═══ LEFT PANEL ═══ -->
+
+<!-- K mark: spine top=124 mid=200 bot=276 -->
+<line x1="72" y1="124" x2="72" y2="276" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+<line x1="72" y1="200" x2="155" y2="132" stroke="#ef4444" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+<line x1="72" y1="200" x2="155" y2="268" stroke="#f97316" stroke-width="4" stroke-linecap="round" opacity="0.9"/>
+
+<circle cx="72"  cy="124" r="12" fill="url(#na)" opacity="0.28"/><circle cx="72"  cy="124" r="7"  fill="#f59e0b"/>
+<circle cx="72"  cy="200" r="16" fill="url(#na)" opacity="0.22"/><circle cx="72"  cy="200" r="10" fill="#f59e0b"/>
+<circle cx="72"  cy="200" r="16" fill="none" stroke="#f59e0b" stroke-width="0.8" opacity="0.28" stroke-dasharray="4 3"/>
+<circle cx="72"  cy="276" r="12" fill="url(#na)" opacity="0.28"/><circle cx="72"  cy="276" r="7"  fill="#f59e0b"/>
+
+<circle cx="113" cy="166" r="9"  fill="url(#nr)" opacity="0.28"/><circle cx="113" cy="166" r="5"  fill="#ef4444"/>
+<circle cx="155" cy="132" r="14" fill="url(#nr)" opacity="0.30"/><circle cx="155" cy="132" r="8"  fill="#ef4444"/>
+<circle cx="155" cy="132" r="14" fill="none" stroke="#ef4444" stroke-width="0.8" opacity="0.25" stroke-dasharray="4 3"/>
+
+<circle cx="113" cy="234" r="9"  fill="url(#ng)" opacity="0.28"/><circle cx="113" cy="234" r="5"  fill="#22c55e"/>
+<circle cx="155" cy="268" r="14" fill="url(#na)" opacity="0.30"/><circle cx="155" cy="268" r="8"  fill="#f97316"/>
+<circle cx="155" cy="268" r="14" fill="none" stroke="#f97316" stroke-width="0.8" opacity="0.25" stroke-dasharray="4 3"/>
+
+<!-- KAIROS wordmark: gradient fill -->
+<text x="195" y="224"
+  font-family="'Bebas Neue','Impact','Arial Narrow',sans-serif"
+  font-size="96" letter-spacing="8" fill="url(#kGrad)">KAIROS</text>
+<!-- Scanline texture -->
+<rect x="195" y="132" width="520" height="96" fill="url(#scanlines)" mask="url(#kMask)"/>
+<!-- Crisp stroke outline -->
+<text x="195" y="224"
+  font-family="'Bebas Neue','Impact','Arial Narrow',sans-serif"
+  font-size="96" letter-spacing="8"
+  fill="none" stroke="url(#kStroke)" stroke-width="0.6">KAIROS</text>
+<!-- Top shine -->
+<rect x="195" y="132" width="520" height="16" fill="white" fill-opacity="0.07" mask="url(#kMask)"/>
+
+<!-- Tagline: 28px below baseline 224 -->
+<text x="197" y="254"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="9.5" font-weight="700" fill="#aaa" letter-spacing="3.5">GLOBAL CRISIS INTELLIGENCE PLATFORM</text>
+
+<!-- Amber rule: 14px below tagline -->
+<line x1="197" y1="270" x2="528" y2="270" stroke="#f59e0b" stroke-width="0.8" opacity="0.22"/>
+
+<!-- LIVE badge: 12px below rule -->
+<rect x="197" y="282" width="56" height="20" rx="3" fill="#1c0808" stroke="#ef444444" stroke-width="1"/>
+<circle cx="209" cy="292" r="3" fill="#ef4444" opacity="0.95"/>
+<text x="217" y="296"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="8.5" font-weight="700" fill="#ef4444" letter-spacing="2">LIVE</text>
+
+<!-- v1.0.0 badge -->
+<rect x="261" y="282" width="56" height="20" rx="3" fill="#0c0c0c" stroke="#222" stroke-width="1"/>
+<text x="289" y="296"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="8.5" fill="#777" text-anchor="middle" letter-spacing="1">v1.0.0</text>
+
+<!-- ═══ DIVIDER 1 ═══ -->
+<line x1="556" y1="28" x2="556" y2="372" stroke="#1c1c1c" stroke-width="1"/>
+
+<!-- ═══ CENTRE PANEL  x: 556–868  (usable text: 572–858 = 286px) ═══
+     5 slots × 62px = 310px, start y=48 (label), slots from y=62
+     Slot layout:
+       dot  cy = slot + 13
+       title y = slot + 17
+       desc1 y = slot + 31
+       desc2 y = slot + 42  (only when 2 lines)
+       rule  y = slot + 60
+-->
+
+<text x="572" y="48"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="8.5" font-weight="700" fill="#555" letter-spacing="4.5">CAPABILITIES</text>
+
+<!-- SLOT 0  y=62 -->
+<circle cx="584" cy="75"  r="3.5" fill="#ef4444"/>
+<text x="596" y="79"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="11.5" font-weight="700" fill="#e2e2e2">Weak Signal Detection</text>
+<text x="596" y="93"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="9" fill="#909090">Real-time news clustered</text>
+<text x="596" y="104"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="9" fill="#909090">into emerging risk themes</text>
+<line x1="572" y1="118" x2="852" y2="118" stroke="#181818" stroke-width="1"/>
+
+<!-- SLOT 1  y=124 -->
+<circle cx="584" cy="137" r="3.5" fill="#f59e0b"/>
+<text x="596" y="141"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="11.5" font-weight="700" fill="#e2e2e2">Ripple Engine BFS</text>
+<text x="596" y="155"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="9" fill="#909090">100-node graph · cascade simulation</text>
+<text x="596" y="166"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="9" fill="#909090">· severity decay</text>
+<line x1="572" y1="180" x2="852" y2="180" stroke="#181818" stroke-width="1"/>
+
+<!-- SLOT 2  y=186 -->
+<circle cx="584" cy="199" r="3.5" fill="#22c55e"/>
+<text x="596" y="203"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="11.5" font-weight="700" fill="#e2e2e2">Foresight Index™</text>
+<text x="596" y="217"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="9" fill="#909090">Global supply chain stability score · 0–100</text>
+<line x1="572" y1="232" x2="852" y2="232" stroke="#181818" stroke-width="1"/>
+
+<!-- SLOT 3  y=238 -->
+<circle cx="584" cy="251" r="3.5" fill="#f97316"/>
+<text x="596" y="255"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="11.5" font-weight="700" fill="#e2e2e2">Historical Validation</text>
+<text x="596" y="269"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="9" fill="#909090">COVID · Suez · Ukraine</text>
+<text x="596" y="280"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="9" fill="#909090">— flagged before the world knew</text>
+<line x1="572" y1="294" x2="852" y2="294" stroke="#181818" stroke-width="1"/>
+
+<!-- SLOT 4  y=300 -->
+<circle cx="584" cy="313" r="3.5" fill="#3b82f6"/>
+<text x="596" y="317"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="11.5" font-weight="700" fill="#e2e2e2">What-If Simulator</text>
+<text x="596" y="331"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="9" fill="#909090">Inject any event · trace</text>
+<text x="596" y="342"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="9" fill="#909090">the global cascade instantly</text>
+
+<!-- ═══ DIVIDER 2 ═══ -->
+<line x1="868" y1="28" x2="868" y2="372" stroke="#1c1c1c" stroke-width="1"/>
+
+<!-- ═══ RIGHT PANEL  x: 868–1190 ═══ -->
+
+<text x="890" y="48"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="8.5" font-weight="700" fill="#555" letter-spacing="4.5">BY THE NUMBERS</text>
+
+<!-- stat 1 -->
+<text x="890" y="100"
+  font-family="'Bebas Neue','Impact','Arial Narrow',sans-serif"
+  font-size="44" fill="url(#sGold)">100+</text>
+<text x="890" y="116"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="8.5" fill="#909090" letter-spacing="2">SUPPLY CHAIN NODES</text>
+<line x1="890" y1="130" x2="1178" y2="130" stroke="#181818" stroke-width="1"/>
+
+<!-- stat 2 -->
+<text x="890" y="172"
+  font-family="'Bebas Neue','Impact','Arial Narrow',sans-serif"
+  font-size="44" fill="url(#sRed)">18</text>
+<text x="890" y="188"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="8.5" fill="#909090" letter-spacing="2">DAYS EARLY · COVID DETECTION</text>
+<line x1="890" y1="202" x2="1178" y2="202" stroke="#181818" stroke-width="1"/>
+
+<!-- stat 3 -->
+<text x="890" y="244"
+  font-family="'Bebas Neue','Impact','Arial Narrow',sans-serif"
+  font-size="44" fill="url(#sGreen)">180</text>
+<text x="890" y="260"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="8.5" fill="#909090" letter-spacing="2">WEIGHTED GRAPH EDGES</text>
+<line x1="890" y1="274" x2="1178" y2="274" stroke="#181818" stroke-width="1"/>
+
+<!-- BUILT WITH -->
+<text x="890" y="292"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="8.5" font-weight="700" fill="#555" letter-spacing="3">BUILT WITH</text>
+
+<!-- pill row 1: y=302 -->
+<rect x="890"  y="302" width="62" height="19" rx="3" fill="#0d0d0d" stroke="#1e1e1e" stroke-width="1"/>
+<text x="921"  y="315" font-family="'JetBrains Mono','Courier New',monospace" font-size="8" fill="#888" text-anchor="middle">Next.js</text>
+<rect x="960"  y="302" width="62" height="19" rx="3" fill="#0d0d0d" stroke="#1e1e1e" stroke-width="1"/>
+<text x="991"  y="315" font-family="'JetBrains Mono','Courier New',monospace" font-size="8" fill="#888" text-anchor="middle">FastAPI</text>
+<rect x="1030" y="302" width="62" height="19" rx="3" fill="#0d0d0d" stroke="#1e1e1e" stroke-width="1"/>
+<text x="1061" y="315" font-family="'JetBrains Mono','Courier New',monospace" font-size="8" fill="#888" text-anchor="middle">Groq</text>
+
+<!-- pill row 2: y=328 -->
+<rect x="890"  y="328" width="62" height="19" rx="3" fill="#0d0d0d" stroke="#1e1e1e" stroke-width="1"/>
+<text x="921"  y="341" font-family="'JetBrains Mono','Courier New',monospace" font-size="8" fill="#888" text-anchor="middle">D3.js</text>
+<rect x="960"  y="328" width="62" height="19" rx="3" fill="#0d0d0d" stroke="#1e1e1e" stroke-width="1"/>
+<text x="991"  y="341" font-family="'JetBrains Mono','Courier New',monospace" font-size="8" fill="#888" text-anchor="middle">Cytoscape</text>
+<rect x="1030" y="328" width="62" height="19" rx="3" fill="#0d0d0d" stroke="#1e1e1e" stroke-width="1"/>
+<text x="1061" y="341" font-family="'JetBrains Mono','Courier New',monospace" font-size="8" fill="#888" text-anchor="middle">NetworkX</text>
+
+<!-- Bottom tagline -->
+<text x="600" y="384"
+  font-family="'JetBrains Mono','Courier New',monospace"
+  font-size="10" fill="#555" text-anchor="middle"
+  letter-spacing="3" font-style="italic">Every crisis leaves a signal. KAIROS reads it first.</text>
+
+</svg>
