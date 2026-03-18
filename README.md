@@ -1,3 +1,5 @@
+<div align="center">
+
 # KAIROS
 ### *Foresee the moment. Before the world breaks.*
 
@@ -24,8 +26,8 @@
 </div>
 
 ---
+<br/>
 
-<div align="center">
 
 <br/>
 
