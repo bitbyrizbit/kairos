@@ -58,3 +58,12 @@ body {
 .pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
 .fade-up { animation: fade-up 0.3s ease-out forwards; }
 .spin-slow { animation: spin-slow 3s linear infinite; }
+
+@keyframes country-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.85; }
+}
+@keyframes node-appear {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}

@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     catastrophic_threshold: int = 80
 
     # -- News ingestion --
-    news_fetch_interval_seconds: int = 300
+    news_fetch_interval_seconds: int = 1800
     max_articles_per_fetch: int = 50
 
     class Config:

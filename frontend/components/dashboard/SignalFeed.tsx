@@ -35,9 +35,9 @@ export function SignalFeed({ clusters, lastUpdated }: Props) {
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{ width: 5, height: 5, borderRadius: "50%", backgroundColor: "#ef4444", display: "inline-block", animation: "pulse-dot 1.5s ease-in-out infinite" }} />
-          <span style={{ fontSize: 10, fontWeight: 700, color: "#666", letterSpacing: "0.15em" }}>SIGNAL FEED</span>
+          <span style={{ fontSize: 10, fontWeight: 800, color: "#888", letterSpacing: "0.15em" }}>SIGNAL FEED</span>
         </div>
-        <span style={{ fontSize: 9, color: "#333", fontFamily: "monospace" }}>
+        <span style={{ fontSize: 9, color: "#555", fontFamily: "monospace", fontWeight: 600 }}>
           {lastUpdated ? formatTime(lastUpdated) : "—"}
         </span>
       </div>
@@ -52,7 +52,7 @@ export function SignalFeed({ clusters, lastUpdated }: Props) {
             <a
               key={i} href={s.url || "#"} target="_blank" rel="noopener noreferrer"
               style={{
-                display: "block", padding: "8px 14px",
+                display: "block", padding: "9px 14px",
                 borderBottom: "1px solid #0f0f0f",
                 textDecoration: "none",
                 transition: "background 0.15s",
@@ -61,19 +61,26 @@ export function SignalFeed({ clusters, lastUpdated }: Props) {
               onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
             >
               <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
-                <p style={{ fontSize: 11, color: "#ccc", lineHeight: 1.4, flex: 1,
-                  overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any }}>
+                <p style={{
+                  fontSize: 11, fontWeight: 600, color: "#ccc", lineHeight: 1.45, flex: 1,
+                  overflow: "hidden", display: "-webkit-box",
+                  WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any,
+                }}>
                   {s.headline}
                 </p>
-                <span style={{ fontSize: 12, fontWeight: 900, color: scoreColor(s.score), fontFamily: "monospace", flexShrink: 0 }}>
+                <span style={{ fontSize: 13, fontWeight: 900, color: scoreColor(s.score), fontFamily: "monospace", flexShrink: 0 }}>
                   {s.score}
                 </span>
               </div>
-              <div style={{ display: "flex", gap: 8, marginTop: 3 }}>
-                <span style={{ fontSize: 9, color: "#3d6b9e", fontFamily: "monospace" }}>{s.source}</span>
-                <span style={{ fontSize: 9, color: "#333" }}>·</span>
-                <span style={{ fontSize: 9, color: scoreColor(s.score), opacity: 0.7, fontFamily: "monospace",
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 120 }}>
+              <div style={{ display: "flex", gap: 6, marginTop: 4, alignItems: "center" }}>
+                <span style={{ fontSize: 9, color: "#4a7ab5", fontFamily: "monospace", fontWeight: 700 }}>{s.source}</span>
+                <span style={{ fontSize: 9, color: "#2a2a2a" }}>·</span>
+                <span style={{
+                  fontSize: 9, fontWeight: 600,
+                  color: scoreColor(s.score), opacity: 0.75,
+                  fontFamily: "monospace",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 130,
+                }}>
                   {s.theme}
                 </span>
               </div>
