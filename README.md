@@ -21,6 +21,7 @@
 
 > **Built for KodeMaster.ai Hackathon 2026** — *Where AI Meets Real Builders*
 </div>
+
 ---
 <br/>
 
