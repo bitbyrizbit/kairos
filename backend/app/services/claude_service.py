@@ -11,8 +11,8 @@ from app.config import get_settings
 settings = get_settings()
 _client = Groq(api_key=settings.groq_api_key)
 
-# llama-3.3-70b hits the sweet spot — smart enough for structured outputs, fast
-_MODEL = "llama-3.3-70b-versatile"
+# llama3-70b-8192 hits the sweet spot — smart enough for structured outputs, fast
+_MODEL = "llama3-70b-8192"
 
 
 def _chat(system: str, user: str, max_tokens: int = 1024) -> str:
