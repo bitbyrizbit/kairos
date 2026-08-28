@@ -121,8 +121,8 @@ export default function Home() {
                }}
              >
                 {/* Orbiting data points */}
-                {ripple.hops.slice(0, 8).map((hop, i) => {
-                  const angle = (i / Math.min(ripple.hops.length, 8)) * Math.PI * 2
+                {ripple.ripple_chain.hops.slice(0, 8).map((hop, i) => {
+                  const angle = (i / Math.min(ripple.ripple_chain.hops.length, 8)) * Math.PI * 2
                   const r = 280
                   const x = Math.cos(angle) * r
                   const y = Math.sin(angle) * r
