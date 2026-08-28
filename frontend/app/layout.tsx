@@ -1,13 +1,13 @@
 import type { Metadata } from "next"
-import { Montserrat, Inter } from "next/font/google"
+import { Cinzel, JetBrains_Mono } from "next/font/google"
 import "./globals.css"
 
-const montserrat = Montserrat({ 
-  weight: ["300", "400", "500", "600"],
+const cinzel = Cinzel({ 
+  weight: ["400", "500", "600"],
   subsets: ["latin"], 
-  variable: "--font-serif" // reusing the css variable name so we don't have to rewrite everything
+  variable: "--font-serif" 
 })
-const inter = Inter({ 
+const jetbrains = JetBrains_Mono({ 
   weight: ["300", "400", "500"],
   subsets: ["latin"], 
   variable: "--font-sans" 
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${montserrat.variable} ${inter.variable}`}>
+    <html lang="en" className={`${cinzel.variable} ${jetbrains.variable}`}>
       <body>
         {children}
       </body>

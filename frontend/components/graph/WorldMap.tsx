@@ -65,7 +65,8 @@ export function WorldMap({ ripple, clusters }: Props) {
         const W = window.innerWidth
         const H = window.innerHeight
 
-        const projection = d3.geoNaturalEarth1().scale(W / 6).translate([W / 1.7, H / 2]).precision(0.1)
+        // Flat, paper-like projection
+        const projection = d3.geoEquirectangular().scale(W / 6.5).translate([W / 2, H / 1.8]).precision(0.1)
         const path = d3.geoPath().projection(projection)
 
         const g = svg.append("g")
@@ -84,8 +85,17 @@ export function WorldMap({ ripple, clusters }: Props) {
         // @ts-ignore
         const countries = topojson.feature(world, world.objects.countries)
         
+        // Define filters inside SVG for the smoke effect
+        const defs = svg.append("defs")
+        const filter = defs.append("filter").attr("id", "smoke-glow").attr("x", "-50%").attr("y", "-50%").attr("width", "200%").attr("height", "200%")
+        filter.append("feGaussianBlur").attr("in", "SourceGraphic").attr("stdDeviation", "8").attr("result", "blur")
+        filter.append("feMerge").selectAll("feMergeNode").data(["blur", "SourceGraphic"]).enter().append("feMergeNode").attr("in", d => d)
+
+        // Group for all map paths to isolate raise()
+        const mapLayer = g.append("g").attr("class", "map-layer")
+
         // @ts-ignore
-        const countryPaths = g.selectAll(".country").data((countries as any).features).enter().append("path").attr("class", "country")
+        const countryPaths = mapLayer.selectAll(".country").data((countries as any).features).enter().append("path").attr("class", "country")
           .attr("d", path as any)
           .attr("fill", (d: any) => {
             const nodeId = numericToNode[+d.id]
@@ -95,20 +105,26 @@ export function WorldMap({ ripple, clusters }: Props) {
           })
           .attr("stroke", "var(--border)")
           .attr("stroke-width", 0.5)
-          .style("transition", "stroke 0.8s ease, stroke-width 0.8s ease")
+          .style("transition", "stroke 0.8s ease, stroke-width 0.8s ease, filter 0.8s ease")
           
         countryPaths.on("mouseenter", function(this: any) {
             d3.select(this)
               .attr("stroke", "#ff3333")
-              .attr("stroke-width", 1.5)
+              .attr("stroke-width", 2)
+              .style("filter", "drop-shadow(0px 0px 12px rgba(255, 51, 51, 0.9))")
+              .raise() // bring to front so stroke doesn't get clipped by neighbors
           })
           .on("mouseleave", function(this: any) {
             d3.select(this)
               .attr("stroke", "var(--border)")
               .attr("stroke-width", 0.5)
+              .style("filter", "none")
           })
 
         // Draw Markers (Score + Label) at centroids
+        // Create a specific group layer for markers so they stay on top
+        const markersLayer = g.append("g").attr("class", "markers-layer").style("pointer-events", "none")
+
         countryPaths.each(function(this: any, d: any) {
           const nodeId = numericToNode[+d.id]
           if (!nodeId || !active[nodeId]) return
@@ -121,30 +137,31 @@ export function WorldMap({ ripple, clusters }: Props) {
           const displayScore = Math.round(nodeData.severity * 100)
 
           // Group for the pin
-          const pin = g.append("g")
+          const pin = markersLayer.append("g")
             .attr("transform", `translate(${x}, ${y})`)
-            .style("pointer-events", "none")
 
           // Score text
           pin.append("text")
             .text(displayScore)
             .attr("text-anchor", "middle")
-            .attr("y", -8)
+            .attr("y", -6)
             .attr("font-family", "var(--font-sans)")
-            .attr("font-size", "14px")
+            .attr("font-size", "15px")
             .attr("font-weight", "600")
-            .attr("fill", "#000")
+            .attr("fill", "#111")
+            .style("mix-blend-mode", "multiply")
 
           // Label text
           pin.append("text")
             .text(nodeData.label)
             .attr("text-anchor", "middle")
-            .attr("y", 6)
-            .attr("font-family", "var(--font-sans)")
-            .attr("font-size", "10px")
-            .attr("font-weight", "400")
-            .attr("fill", "#666")
+            .attr("y", 8)
+            .attr("font-family", "var(--font-serif)")
+            .attr("font-size", "11px")
+            .attr("font-weight", "600")
+            .attr("fill", "#444")
             .attr("letter-spacing", "0.05em")
+            .style("mix-blend-mode", "multiply")
         })
 
         // Routes

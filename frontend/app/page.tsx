@@ -113,14 +113,14 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
   return (
     <div 
       style={{ 
-        position: "absolute", top: 40, left: 40, zIndex: 50,
+        position: "absolute", top: 40, left: 40, zIndex: 99999,
         display: "flex", alignItems: "center", 
-        fontFamily: "var(--font-serif)", fontSize: 36, 
-        fontWeight: 300, letterSpacing: "0.3em", color: "var(--ink)",
+        fontFamily: "var(--font-serif)", fontSize: 42, 
+        fontWeight: 600, letterSpacing: "0.2em", color: "var(--ink)",
         pointerEvents: "auto", userSelect: "none"
       }}
     >
-      <span style={{ marginRight: 2 }}>KAIR</span>
+      <span style={{ marginRight: 6 }}>KAIR</span>
       
       {/* The O which acts as the nav trigger */}
       <div 
@@ -128,15 +128,15 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
         style={{ 
           position: "relative", width: 42, height: 42, 
           display: "flex", alignItems: "center", justifyContent: "center",
-          margin: "0 8px", cursor: "pointer", 
+          margin: "0 4px", cursor: "pointer", 
         }}
       >
         {/* The visual O */}
         <motion.div 
           animate={{ scale: isHovered ? 1.0 : 1 }}
           style={{ 
-            width: 26, height: 26, borderRadius: "50%", 
-            border: "1.5px solid var(--ink)",
+            width: 32, height: 32, borderRadius: "50%", 
+            border: "2px solid var(--ink)",
             backgroundColor: isHovered ? "var(--ink)" : "transparent",
             transition: "background-color 0.3s"
           }} 
@@ -149,7 +149,7 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
               // Arc calculation
               const angle = (i / (views.length - 1)) * 90
               const rad = angle * (Math.PI / 180)
-              const radius = 100 // Distance from O
+              const radius = 130 // Distance from O
               const x = Math.cos(rad) * radius
               const y = Math.sin(rad) * radius
 
