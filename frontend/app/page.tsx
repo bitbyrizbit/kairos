@@ -1,164 +1,185 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState } from "react"
+import { motion } from "framer-motion"
 import { WorldMap } from "@/components/graph/WorldMap"
+import { KairosScorePanel } from "@/components/dashboard/KairosScorePanel"
+import { SignalFeed } from "@/components/dashboard/SignalFeed"
+import { CrisisTimeline } from "@/components/dashboard/CrisisTimeline"
+import { RippleGraph } from "@/components/graph/RippleGraph"
+import { SimulatorPanel } from "@/components/simulator/SimulatorPanel"
+import { LoadingPulse } from "@/components/ui/LoadingPulse"
 import { useSignals } from "@/hooks/useSignals"
 import { useKairosScore } from "@/hooks/useKairosScore"
 import { useRipple } from "@/hooks/useRipple"
 
-type View = "core" | "simulate" | "signals"
+type View = "dashboard" | "simulator" | "signals" | "historical"
 
 export default function Home() {
-  const [view, setView] = useState<View>("core")
-  const { data: signals } = useSignals()
+  const [view, setView] = useState<View>("dashboard")
+  const { data: signals, loading: signalsLoading } = useSignals()
   const kairosIndex = useKairosScore(signals)
   const { data: ripple, loading: rippleLoading, analyze } = useRipple()
   
-  const [query, setQuery] = useState("")
+  return (
+    <div style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden", backgroundColor: "var(--bg)" }}>
+      {/* Background Layer: Map */}
+      <WorldMap ripple={ripple?.ripple_chain ?? null} clusters={signals?.clusters ?? []} />
+      
+      {/* Top Left: Minimal Logo */}
+      <div style={{ position: "absolute", top: 40, left: 40, zIndex: 10 }}>
+        <h1 style={{ fontFamily: "var(--font-serif)", fontSize: 28, fontStyle: "italic", fontWeight: 400, color: "var(--ink)", letterSpacing: "-0.02em", margin: 0 }}>
+          Kairos
+        </h1>
+        <div style={{ fontSize: 11, fontFamily: "var(--font-sans)", color: "var(--ink-light)", letterSpacing: "0.05em", marginTop: 4 }}>
+          Global intelligence
+        </div>
+      </div>
 
-  // Handle global key press to return to core
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setView("core")
-    }
-    window.addEventListener("keydown", handleEsc)
-    return () => window.removeEventListener("keydown", handleEsc)
-  }, [])
+      {/* Main Content Areas */}
+      <div style={{ position: "absolute", inset: "40px 40px 40px 320px", display: "flex", gap: 40, zIndex: 5, pointerEvents: "none" }}>
+        
+        {/* Left Side: Dynamic Module based on View */}
+        <div style={{ width: 340, display: "flex", flexDirection: "column", gap: 40, pointerEvents: "auto" }}>
+          {view === "dashboard" && (
+            <div className="editorial-panel fade-in" style={{ flex: 1, overflow: "hidden" }}>
+              <KairosScorePanel clusters={signals?.clusters ?? []} kairosIndex={kairosIndex} />
+            </div>
+          )}
+          {view === "signals" && (
+            <div className="editorial-panel fade-in" style={{ flex: 1, overflow: "hidden" }}>
+               <SignalFeed clusters={signals?.clusters ?? []} lastUpdated={signals?.last_updated ?? ""} />
+            </div>
+          )}
+          {view === "simulator" && (
+            <div className="editorial-panel fade-in" style={{ flex: 1, overflow: "hidden" }}>
+               <SimulatorPanel mode="simulate" onAnalyze={analyze} />
+            </div>
+          )}
+          {view === "historical" && (
+            <div className="editorial-panel fade-in" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+               <span style={{ fontFamily: "var(--font-sans)", color: "var(--ink-light)", fontSize: 13 }}>Archival data unavailable.</span>
+            </div>
+          )}
+        </div>
+
+        {/* Center/Right Canvas: Ripple Graph & Timeline (only shows when there's data) */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 40, pointerEvents: "auto" }}>
+          {view === "dashboard" && (ripple || rippleLoading) && (
+            <div className="editorial-panel fade-in" style={{ flex: 1, position: "relative" }}>
+              {rippleLoading ? (
+                <div style={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center" }}>
+                  <LoadingPulse message="Synthesizing cascade..." />
+                </div>
+              ) : (
+                <RippleGraph ripple={ripple?.ripple_chain ?? null} isAnimating={!!ripple} />
+              )}
+            </div>
+          )}
+          
+          {view === "dashboard" && ripple && !rippleLoading && (
+            <div className="editorial-panel fade-in" style={{ height: 280, overflow: "hidden" }}>
+              <CrisisTimeline ripple={ripple?.ripple_chain ?? null} event={ripple?.parsed_event?.event_summary ?? ""} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Novel Interface: Bottom-Left Circular Navigation Orbit */}
+      <OrbitalNav currentView={view} onChange={setView} />
+      
+      {/* Minimal Analyze Input floating bottom right */}
+      {view === "dashboard" && (
+         <div style={{ position: "absolute", bottom: 40, right: 40, zIndex: 20, width: 400 }}>
+           <MinimalInput onAnalyze={analyze} isLoading={rippleLoading} />
+         </div>
+      )}
+    </div>
+  )
+}
+
+function OrbitalNav({ currentView, onChange }: { currentView: View, onChange: (v: View) => void }) {
+  const views: { id: View, label: string }[] = [
+    { id: "dashboard", label: "Dashboard" },
+    { id: "simulator", label: "Simulator" },
+    { id: "signals", label: "Signals" },
+    { id: "historical", label: "Historical" },
+  ]
 
   return (
-    <div style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden", backgroundColor: "#0a0a0a", color: "#fff", fontFamily: "var(--font-sans)" }}>
-      {/* Deep Background */}
-      <WorldMap ripple={ripple?.ripple_chain ?? null} clusters={signals?.clusters ?? []} />
-
-      {/* The Central Singularity */}
+    <div style={{ position: "absolute", bottom: 60, left: 60, zIndex: 20, width: 160, height: 160 }}>
+      {/* Center circle purely decorative or status */}
       <div style={{
-        position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)",
-        width: 1, height: 1, zIndex: 10
+        position: "absolute", inset: 40, borderRadius: "50%",
+        border: "1px solid var(--border)", backgroundColor: "var(--surface)",
+        display: "flex", alignItems: "center", justifyContent: "center"
       }}>
-        
-        {/* Core View: The Kairos Score */}
-        <AnimatePresence>
-          {view === "core" && (
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0, opacity: 0 }}
-              transition={{ type: "spring", damping: 20, stiffness: 100 }}
-              style={{
-                position: "absolute", top: -150, left: -150,
-                width: 300, height: 300, borderRadius: "50%",
-                border: "1px solid rgba(255,255,255,0.1)",
-                backdropFilter: "blur(20px)",
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                cursor: "pointer",
-                boxShadow: "0 0 100px rgba(255,255,255,0.02) inset"
-              }}
-              onClick={() => setView("simulate")}
-            >
-              <span style={{ fontSize: 12, letterSpacing: "0.2em", color: "rgba(255,255,255,0.5)", textTransform: "uppercase" }}>Global Stability</span>
-              <span style={{ fontSize: 96, fontWeight: 300, fontFamily: "var(--font-serif)", lineHeight: 1, margin: "10px 0" }}>
-                {kairosIndex?.index_value ?? "--"}
-              </span>
-              <span style={{ fontSize: 12, color: "rgba(255,255,255,0.4)" }}>Click to simulate disruption</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Simulate View: The Command Ring */}
-        <AnimatePresence>
-          {view === "simulate" && (
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 1.2, opacity: 0 }}
-              style={{
-                position: "absolute", top: -200, left: -200,
-                width: 400, height: 400, borderRadius: "50%",
-                backgroundColor: "rgba(0,0,0,0.4)",
-                border: "1px solid rgba(255,255,255,0.15)",
-                backdropFilter: "blur(30px)",
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                padding: 40, textAlign: "center"
-              }}
-            >
-              <input
-                autoFocus
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === "Enter" && query) {
-                    analyze(query)
-                    setView("signals")
-                  }
-                }}
-                placeholder="Type disruption event..."
-                style={{
-                  background: "transparent", border: "none", outline: "none",
-                  color: "#fff", fontSize: 24, fontFamily: "var(--font-serif)",
-                  textAlign: "center", width: "100%", borderBottom: "1px solid rgba(255,255,255,0.2)",
-                  paddingBottom: 10
-                }}
-              />
-              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 20, letterSpacing: "0.1em" }}>Press Enter to shatter reality. Esc to cancel.</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Signals View: The Cascade Output */}
-        <AnimatePresence>
-          {view === "signals" && ripple && (
-             <motion.div
-               initial={{ opacity: 0 }}
-               animate={{ opacity: 1 }}
-               exit={{ opacity: 0 }}
-               style={{
-                 position: "absolute", top: -300, left: -300,
-                 width: 600, height: 600, borderRadius: "50%",
-                 border: "1px solid rgba(255,255,255,0.05)",
-                 display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                 pointerEvents: "none"
-               }}
-             >
-                {/* Orbiting data points */}
-                {ripple.ripple_chain.hops.slice(0, 8).map((hop, i) => {
-                  const angle = (i / Math.min(ripple.ripple_chain.hops.length, 8)) * Math.PI * 2
-                  const r = 280
-                  const x = Math.cos(angle) * r
-                  const y = Math.sin(angle) * r
-                  return (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.1 }}
-                      style={{
-                        position: "absolute", left: 300 + x, top: 300 + y,
-                        transform: "translate(-50%, -50%)",
-                        background: "rgba(0,0,0,0.8)", border: "1px solid rgba(255,255,255,0.2)",
-                        padding: "10px 16px", borderRadius: 30, fontSize: 12,
-                        backdropFilter: "blur(10px)", whiteSpace: "nowrap"
-                      }}
-                    >
-                      {hop.node_label}
-                    </motion.div>
-                  )
-                })}
-
-                <div style={{ textAlign: "center", maxWidth: 400, padding: 40, background: "rgba(0,0,0,0.6)", borderRadius: "50%", backdropFilter: "blur(20px)", pointerEvents: "auto" }}>
-                   <h2 style={{ fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 10, letterSpacing: "0.1em" }}>Impact Narrative</h2>
-                   <p style={{ fontSize: 16, fontFamily: "var(--font-serif)", lineHeight: 1.6 }}>{ripple.crisis_narrative}</p>
-                   <button onClick={() => setView("core")} style={{ marginTop: 30, background: "none", border: "1px solid #fff", color: "#fff", padding: "8px 24px", borderRadius: 40, cursor: "pointer", fontSize: 12 }}>Reset</button>
-                </div>
-             </motion.div>
-          )}
-        </AnimatePresence>
+        <div className="gentle-pulse" style={{ width: 4, height: 4, borderRadius: "50%", backgroundColor: "var(--ink)" }} />
       </div>
 
-      {/* Global minimal text */}
-      <div style={{ position: "absolute", bottom: 40, left: 40, fontSize: 12, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em" }}>
-        KAIROS INTELLIGENCE
-      </div>
+      {/* Orbiting text elements */}
+      {views.map((v, i) => {
+        const angle = (i * (360 / views.length)) - 90
+        const rad = angle * (Math.PI / 180)
+        const radius = 80
+        const x = Math.cos(rad) * radius
+        const y = Math.sin(rad) * radius
+
+        return (
+          <button
+            key={v.id}
+            onClick={() => onChange(v.id)}
+            style={{
+              position: "absolute",
+              left: 80 + x, top: 80 + y,
+              transform: "translate(-50%, -50%)",
+              background: "none", border: "none", cursor: "pointer",
+              fontFamily: "var(--font-sans)", fontSize: 11,
+              color: currentView === v.id ? "var(--ink)" : "var(--ink-lighter)",
+              fontWeight: currentView === v.id ? 500 : 400,
+              padding: 10, transition: "color 0.3s"
+            }}
+          >
+            {v.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function MinimalInput({ onAnalyze, isLoading }: { onAnalyze: (t: string) => void, isLoading: boolean }) {
+  const [query, setQuery] = useState("")
+  
+  return (
+    <div style={{ 
+      display: "flex", alignItems: "center", gap: 12,
+      background: "var(--surface)", border: "1px solid var(--border)",
+      borderRadius: 40, padding: "8px 8px 8px 24px",
+      boxShadow: "0 4px 20px rgba(0,0,0,0.03)"
+    }}>
+      <input 
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        onKeyDown={e => e.key === "Enter" && query.trim() && !isLoading && onAnalyze(query)}
+        placeholder="Input disruption scenario..."
+        style={{
+          flex: 1, background: "transparent", border: "none", outline: "none",
+          color: "var(--ink)", fontFamily: "var(--font-sans)", fontSize: 13,
+        }}
+        disabled={isLoading}
+      />
+      <button 
+        className="circle-btn"
+        style={{ width: 32, height: 32, opacity: (!query.trim() || isLoading) ? 0.3 : 1 }}
+        onClick={() => query.trim() && !isLoading && onAnalyze(query)}
+        disabled={!query.trim() || isLoading}
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </button>
     </div>
   )
 }
