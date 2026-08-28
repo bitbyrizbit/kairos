@@ -1,28 +1,27 @@
 import type { Metadata } from "next"
-import { Cormorant_Garamond, Lato } from "next/font/google"
+import { Montserrat, Inter } from "next/font/google"
 import "./globals.css"
 
-const cormorant = Cormorant_Garamond({ 
-  weight: ["300", "400", "500", "600", "700"],
+const montserrat = Montserrat({ 
+  weight: ["300", "400", "500", "600"],
   subsets: ["latin"], 
-  style: ["normal", "italic"], 
-  variable: "--font-serif" 
+  variable: "--font-serif" // reusing the css variable name so we don't have to rewrite everything
 })
-const lato = Lato({ 
-  weight: ["300", "400", "700"],
+const inter = Inter({ 
+  weight: ["300", "400", "500"],
   subsets: ["latin"], 
   variable: "--font-sans" 
 })
 
 export const metadata: Metadata = {
-  title: "Kairos Intelligence",
-  description: "Global crisis intelligence and supply chain cascade modeling.",
+  title: "KAIROS",
+  description: "Global Intelligence",
   icons: { icon: "/favicon.svg" },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${lato.variable}`}>
+    <html lang="en" className={`${montserrat.variable} ${inter.variable}`}>
       <body>
         {children}
       </body>

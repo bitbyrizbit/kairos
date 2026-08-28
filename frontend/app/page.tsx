@@ -26,16 +26,6 @@ export default function Home() {
       {/* Background Layer: Map */}
       <WorldMap ripple={ripple?.ripple_chain ?? null} clusters={signals?.clusters ?? []} />
       
-      {/* Top Left: Minimal Logo */}
-      <div style={{ position: "absolute", top: 40, left: 40, zIndex: 10 }}>
-        <h1 style={{ fontFamily: "var(--font-serif)", fontSize: 28, fontStyle: "italic", fontWeight: 400, color: "var(--ink)", letterSpacing: "-0.02em", margin: 0 }}>
-          Kairos
-        </h1>
-        <div style={{ fontSize: 11, fontFamily: "var(--font-sans)", color: "var(--ink-light)", letterSpacing: "0.05em", marginTop: 4 }}>
-          Global intelligence
-        </div>
-      </div>
-
       {/* Main Content Areas */}
       <div style={{ position: "absolute", inset: "40px 40px 40px 320px", display: "flex", gap: 40, zIndex: 5, pointerEvents: "none" }}>
         
@@ -85,8 +75,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Novel Interface: Bottom-Left Circular Navigation Orbit */}
-      <OrbitalNav currentView={view} onChange={setView} />
+      {/* Novel Interface: Interactive Logo Navbar */}
+      <InteractiveLogo currentView={view} onChange={setView} />
       
       {/* Minimal Analyze Input floating bottom right */}
       {view === "dashboard" && (
@@ -98,7 +88,9 @@ export default function Home() {
   )
 }
 
-function OrbitalNav({ currentView, onChange }: { currentView: View, onChange: (v: View) => void }) {
+function InteractiveLogo({ currentView, onChange }: { currentView: View, onChange: (v: View) => void }) {
+  const [isHovered, setIsHovered] = useState(false)
+
   const views: { id: View, label: string }[] = [
     { id: "dashboard", label: "Dashboard" },
     { id: "simulator", label: "Simulator" },
@@ -107,43 +99,76 @@ function OrbitalNav({ currentView, onChange }: { currentView: View, onChange: (v
   ]
 
   return (
-    <div style={{ position: "absolute", bottom: 60, left: 60, zIndex: 20, width: 160, height: 160 }}>
-      {/* Center circle purely decorative or status */}
-      <div style={{
-        position: "absolute", inset: 40, borderRadius: "50%",
-        border: "1px solid var(--border)", backgroundColor: "var(--surface)",
-        display: "flex", alignItems: "center", justifyContent: "center"
-      }}>
-        <div className="gentle-pulse" style={{ width: 4, height: 4, borderRadius: "50%", backgroundColor: "var(--ink)" }} />
+    <div 
+      style={{ 
+        position: "absolute", top: 40, left: 40, zIndex: 50,
+        display: "flex", alignItems: "center", 
+        fontFamily: "var(--font-serif)", fontSize: 42, 
+        fontWeight: 600, letterSpacing: "0.15em", color: "var(--ink)",
+        pointerEvents: "auto"
+      }}
+    >
+      <span>KAIR</span>
+      
+      {/* The O which acts as the nav trigger */}
+      <div 
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{ 
+          position: "relative", width: 42, height: 42, 
+          display: "flex", alignItems: "center", justifyContent: "center",
+          margin: "0 6px", cursor: "pointer"
+        }}
+      >
+        <motion.div 
+          animate={{ scale: isHovered ? 1.1 : 1 }}
+          style={{ 
+            width: 32, height: 32, borderRadius: "50%", 
+            border: "3px solid var(--ink)",
+            backgroundColor: isHovered ? "var(--ink)" : "transparent",
+            transition: "background-color 0.3s"
+          }} 
+        />
+        
+        {/* Expanding arc of navigation options */}
+        {isHovered && (
+          <div style={{ position: "absolute", top: 21, left: 21 }}>
+            {views.map((v, i) => {
+              // Calculate positions for a semi-circle arc opening downwards/rightwards
+              // 0 to 90 degrees
+              const angle = (i / (views.length - 1)) * 90
+              const rad = angle * (Math.PI / 180)
+              const radius = 120 // Distance from center
+              const x = Math.cos(rad) * radius
+              const y = Math.sin(rad) * radius
+
+              return (
+                <motion.button
+                  key={v.id}
+                  initial={{ opacity: 0, x: 0, y: 0 }}
+                  animate={{ opacity: 1, x, y }}
+                  transition={{ delay: i * 0.05, type: "spring", stiffness: 200, damping: 20 }}
+                  onClick={() => onChange(v.id)}
+                  style={{
+                    position: "absolute",
+                    transform: "translate(-50%, -50%)",
+                    background: "var(--surface)", border: "1px solid var(--border)",
+                    color: currentView === v.id ? "var(--ink)" : "var(--ink-light)",
+                    padding: "8px 16px", borderRadius: 20, cursor: "pointer",
+                    fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 500,
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+                    whiteSpace: "nowrap"
+                  }}
+                >
+                  {v.label}
+                </motion.button>
+              )
+            })}
+          </div>
+        )}
       </div>
-
-      {/* Orbiting text elements */}
-      {views.map((v, i) => {
-        const angle = (i * (360 / views.length)) - 90
-        const rad = angle * (Math.PI / 180)
-        const radius = 80
-        const x = Math.cos(rad) * radius
-        const y = Math.sin(rad) * radius
-
-        return (
-          <button
-            key={v.id}
-            onClick={() => onChange(v.id)}
-            style={{
-              position: "absolute",
-              left: 80 + x, top: 80 + y,
-              transform: "translate(-50%, -50%)",
-              background: "none", border: "none", cursor: "pointer",
-              fontFamily: "var(--font-sans)", fontSize: 11,
-              color: currentView === v.id ? "var(--ink)" : "var(--ink-lighter)",
-              fontWeight: currentView === v.id ? 500 : 400,
-              padding: 10, transition: "color 0.3s"
-            }}
-          >
-            {v.label}
-          </button>
-        )
-      })}
+      
+      <span>S</span>
     </div>
   )
 }
