@@ -6,36 +6,36 @@ export function cn(...classes: (string | undefined | false | null)[]): string {
 
 export function statusColor(status: RiskStatus): string {
   switch (status) {
-    case "catastrophic": return "#ef4444"
-    case "critical":     return "#f97316"
-    case "elevated":     return "#f59e0b"
-    case "monitoring":   return "#22c55e"
-    default:             return "#555555"
+    case "catastrophic": return "#FF3333" // Red
+    case "critical":     return "#FF6600" // Safety Orange
+    case "elevated":     return "#E5A910" // Amber
+    case "monitoring":   return "#00FFC4" // Cyan
+    default:             return "#8F8F99"
   }
 }
 
 export function impactColor(impact: ImpactLevel | string): string {
   switch (impact) {
-    case "critical": return "#ef4444"
-    case "high":     return "#f97316"
-    case "medium":   return "#f59e0b"
-    case "low":      return "#22c55e"
-    default:         return "#555555"
+    case "critical": return "#FF3333"
+    case "high":     return "#FF6600"
+    case "medium":   return "#E5A910"
+    case "low":      return "#00FFC4"
+    default:         return "#8F8F99"
   }
 }
 
 export function scoreColor(score: number): string {
-  if (score >= 80) return "#ef4444"
-  if (score >= 65) return "#f97316"
-  if (score >= 45) return "#f59e0b"
-  return "#22c55e"
+  if (score >= 80) return "#FF3333"
+  if (score >= 65) return "#FF6600"
+  if (score >= 45) return "#E5A910"
+  return "#00FFC4"
 }
 
 export function scoreLabel(score: number): string {
   if (score >= 80) return "CATASTROPHIC"
   if (score >= 65) return "CRITICAL"
   if (score >= 45) return "ELEVATED"
-  return "MONITORING"
+  return "STABLE"
 }
 
 export function formatTime(iso: string): string {
@@ -51,7 +51,7 @@ export function formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString("en-US", {
       day: "numeric", month: "short", year: "numeric",
     })
-  } catch { return "Unknown" }
+  } catch { return "UNKNOWN" }
 }
 
 export function downloadBlob(blob: Blob, filename: string) {
