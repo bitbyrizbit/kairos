@@ -25,61 +25,61 @@ export function SignalFeed({ clusters, lastUpdated }: Props) {
   const top = signals.slice(0, 18)
 
   return (
-    <div style={{
-      height: "100%", display: "flex", flexDirection: "column",
-      backgroundColor: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, overflow: "hidden",
-    }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{
-        padding: "10px 14px", borderBottom: "1px solid #1a1a1a",
+        padding: "12px 16px", borderBottom: "1px solid var(--border)",
         display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ width: 5, height: 5, borderRadius: "50%", backgroundColor: "#ef4444", display: "inline-block", animation: "pulse-dot 1.5s ease-in-out infinite" }} />
-          <span style={{ fontSize: 10, fontWeight: 800, color: "#888", letterSpacing: "0.15em" }}>SIGNAL FEED</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ width: 6, height: 6, backgroundColor: "var(--red)", display: "inline-block" }} className="pulse-dot" />
+          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text1)", letterSpacing: "0.15em", fontFamily: "var(--font-mono-data)" }}>
+            RAW SIGNAL STREAM
+          </span>
         </div>
-        <span style={{ fontSize: 9, color: "#555", fontFamily: "monospace", fontWeight: 600 }}>
+        <span style={{ fontSize: 10, color: "var(--text2)", fontFamily: "var(--font-mono-data)" }}>
           {lastUpdated ? formatTime(lastUpdated) : "—"}
         </span>
       </div>
 
       <div style={{ flex: 1, overflowY: "auto" }}>
         {top.length === 0 ? (
-          <div style={{ padding: 20, textAlign: "center", fontSize: 11, color: "#333" }}>
-            Scanning feeds...
+          <div style={{ padding: 20, textAlign: "center", fontSize: 11, color: "var(--text3)", fontFamily: "var(--font-mono-data)" }}>
+            SCANNING FEEDS...
           </div>
         ) : (
           top.map((s, i) => (
             <a
               key={i} href={s.url || "#"} target="_blank" rel="noopener noreferrer"
               style={{
-                display: "block", padding: "9px 14px",
-                borderBottom: "1px solid #0f0f0f",
+                display: "block", padding: "10px 16px",
+                borderBottom: "1px solid rgba(255,255,255,0.03)",
                 textDecoration: "none",
-                transition: "background 0.15s",
+                transition: "background 0.2s",
               }}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#111")}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)")}
               onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "flex-start" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}>
                 <p style={{
-                  fontSize: 11, fontWeight: 600, color: "#ccc", lineHeight: 1.45, flex: 1,
+                  fontSize: 12, fontWeight: 600, color: "var(--text1)", lineHeight: 1.45, flex: 1,
                   overflow: "hidden", display: "-webkit-box",
                   WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any,
                 }}>
                   {s.headline}
                 </p>
-                <span style={{ fontSize: 13, fontWeight: 900, color: scoreColor(s.score), fontFamily: "monospace", flexShrink: 0 }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: scoreColor(s.score), fontFamily: "var(--font-mono-data)", flexShrink: 0 }}>
                   {s.score}
                 </span>
               </div>
-              <div style={{ display: "flex", gap: 6, marginTop: 4, alignItems: "center" }}>
-                <span style={{ fontSize: 9, color: "#4a7ab5", fontFamily: "monospace", fontWeight: 700 }}>{s.source}</span>
-                <span style={{ fontSize: 9, color: "#2a2a2a" }}>·</span>
+              <div style={{ display: "flex", gap: 8, marginTop: 6, alignItems: "center" }}>
+                <span style={{ fontSize: 10, color: "var(--cyan)", fontFamily: "var(--font-mono-data)", fontWeight: 600 }}>
+                  {s.source}
+                </span>
+                <span style={{ fontSize: 10, color: "var(--border)" }}>/</span>
                 <span style={{
-                  fontSize: 9, fontWeight: 600,
-                  color: scoreColor(s.score), opacity: 0.75,
-                  fontFamily: "monospace",
-                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 130,
+                  fontSize: 10, fontWeight: 500,
+                  color: "var(--text2)", fontFamily: "var(--font-mono-data)",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 160,
                 }}>
                   {s.theme}
                 </span>

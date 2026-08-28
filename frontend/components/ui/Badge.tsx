@@ -11,20 +11,21 @@ interface Props {
 }
 
 export function Badge({ label, type = "default", value, size = "md" }: Props) {
-  let color = "#555"
+  let color = "var(--text2)"
   if (type === "impact" && value) color = impactColor(value as ImpactLevel)
   else if (type === "status" && value) color = statusColor(value as RiskStatus)
 
   return (
     <span style={{
       display: "inline-flex", alignItems: "center",
-      padding: size === "sm" ? "2px 6px" : "3px 8px",
-      fontSize: size === "sm" ? 9 : 10,
-      fontFamily: "monospace", fontWeight: 700,
+      padding: size === "sm" ? "3px 6px" : "4px 8px",
+      fontSize: size === "sm" ? 10 : 11,
+      fontFamily: "var(--font-mono-data)", fontWeight: 700,
       letterSpacing: "0.1em", textTransform: "uppercase",
-      borderRadius: 3, color,
-      backgroundColor: `${color}15`,
-      border: `1px solid ${color}30`,
+      color,
+      backgroundColor: `${color}20`,
+      border: `1px solid ${color}60`,
+      clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))"
     }}>
       {label}
     </span>

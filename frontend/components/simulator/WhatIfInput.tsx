@@ -19,67 +19,69 @@ export function WhatIfInput({ onSubmit, isLoading, mode = "simulate" }: Props) {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       <div style={{
-        borderRadius: 6, overflow: "hidden",
-        border: "1px solid #1e1e1e", backgroundColor: "#0d0d0d",
+        border: "1px solid var(--border)", backgroundColor: "rgba(0,0,0,0.5)",
+        clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))"
       }}>
         <textarea
           value={value}
           onChange={e => setValue(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) run() }}
-          placeholder={mode === "analyze" ? "Describe a real disruption event..." : "What if China blockades Taiwan? What if Suez Canal closes?"}
+          placeholder={mode === "analyze" ? "DESCRIBE A REAL DISRUPTION EVENT..." : "WHAT IF CHINA BLOCKADES TAIWAN? WHAT IF SUEZ CANAL CLOSES?"}
           rows={3}
           disabled={isLoading}
           style={{
             width: "100%", backgroundColor: "transparent", border: "none", outline: "none",
-            padding: "12px 14px", fontSize: 12, color: "#ccc",
-            fontFamily: "monospace", resize: "none", lineHeight: 1.5,
+            padding: "16px 20px", fontSize: 13, color: "var(--text1)",
+            fontFamily: "var(--font-mono-data)", resize: "none", lineHeight: 1.5,
           }}
         />
         <div style={{
           display: "flex", justifyContent: "space-between", alignItems: "center",
-          padding: "8px 12px", borderTop: "1px solid #1a1a1a",
+          padding: "10px 16px", borderTop: "1px solid rgba(255,255,255,0.05)",
         }}>
-          <span style={{ fontSize: 9, color: "#333", fontFamily: "monospace" }}>
-            {mode === "simulate" ? "Hypothetical" : "Live event"} · Ctrl+Enter
+          <span style={{ fontSize: 10, color: "var(--text3)", fontFamily: "var(--font-mono-data)" }}>
+            {mode === "simulate" ? "HYPOTHETICAL" : "LIVE EVENT"} // CTRL+ENTER
           </span>
           <button
+            className="panel-tactical-btn"
             onClick={run}
             disabled={!value.trim() || isLoading}
             style={{
-              padding: "5px 14px", borderRadius: 4, border: "none",
-              fontSize: 11, fontWeight: 700, fontFamily: "monospace",
+              padding: "6px 16px", border: "none",
+              fontSize: 11, fontWeight: 700, fontFamily: "var(--font-mono-data)",
               cursor: !value.trim() || isLoading ? "not-allowed" : "pointer",
-              backgroundColor: !value.trim() || isLoading ? "#1a1a1a" : "#f59e0b",
-              color: !value.trim() || isLoading ? "#444" : "#000",
-              transition: "all 0.15s",
+              backgroundColor: !value.trim() || isLoading ? "rgba(255,255,255,0.05)" : "var(--red)",
+              color: !value.trim() || isLoading ? "var(--text3)" : "#000",
+              transition: "all 0.2s",
             }}
           >
-            {isLoading ? "Running..." : "RUN →"}
+            {isLoading ? "PROCESSING..." : "EXECUTE"}
           </button>
         </div>
       </div>
 
       <div>
-        <div style={{ fontSize: 9, color: "#333", letterSpacing: "0.15em", marginBottom: 8 }}>QUICK SCENARIOS</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        <div style={{ fontSize: 10, color: "var(--text2)", letterSpacing: "0.15em", marginBottom: 10, fontFamily: "var(--font-mono-data)", fontWeight: 700 }}>QUICK SCENARIOS</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {DEMO_SCENARIOS.map(s => (
             <button
               key={s.id}
               onClick={() => { setValue(s.description); onSubmit(s.description) }}
               disabled={isLoading}
               style={{
-                textAlign: "left", padding: "8px 12px", borderRadius: 4,
-                backgroundColor: "#0d0d0d", border: "1px solid #1a1a1a",
+                textAlign: "left", padding: "10px 14px",
+                backgroundColor: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.05)",
                 cursor: isLoading ? "not-allowed" : "pointer",
-                transition: "border-color 0.15s",
+                transition: "all 0.2s",
+                clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 0 100%)"
               }}
-              onMouseEnter={e => !isLoading && (e.currentTarget.style.borderColor = "#2a2a2a")}
-              onMouseLeave={e => (e.currentTarget.style.borderColor = "#1a1a1a")}
+              onMouseEnter={e => !isLoading && (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)")}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.3)")}
             >
-              <div style={{ fontSize: 11, fontWeight: 600, color: "#888", marginBottom: 2 }}>{s.label}</div>
-              <div style={{ fontSize: 10, color: "#444", lineHeight: 1.4 }}>{s.description}</div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "var(--cyan)", marginBottom: 4, fontFamily: "var(--font-mono-data)" }}>{s.label}</div>
+              <div style={{ fontSize: 11, color: "var(--text2)", lineHeight: 1.4, fontFamily: "var(--font-body)" }}>{s.description}</div>
             </button>
           ))}
         </div>

@@ -8,7 +8,6 @@ interface Props {
 }
 
 export function Ticker({ clusters }: Props) {
-  // deduplicate headlines
   const seen = new Set<string>()
   const items: { text: string; score: number; source: string }[] = []
 
@@ -23,50 +22,37 @@ export function Ticker({ clusters }: Props) {
 
   if (!items.length) {
     return (
-      <div style={{
-        height: 28, backgroundColor: "#080808",
-        borderBottom: "1px solid #1a1a1a",
-        display: "flex", alignItems: "center", padding: "0 16px",
-        fontSize: 10, color: "#333", fontFamily: "monospace",
-      }}>
-        Scanning global signals...
+      <div style={{ height: 32, display: "flex", alignItems: "center", padding: "0 16px", fontSize: 10, color: "var(--text3)", fontFamily: "var(--font-mono-data)" }}>
+        SCANNING GLOBAL SIGNALS...
       </div>
     )
   }
 
-  // duplicate for seamless loop
   const doubled = [...items, ...items]
 
   return (
-    <div style={{
-      height: 28, backgroundColor: "#080808",
-      borderBottom: "1px solid #1a1a1a",
-      display: "flex", alignItems: "center",
-      overflow: "hidden", flexShrink: 0,
-    }}>
-      {/* LIVE badge */}
+    <div style={{ height: 32, display: "flex", alignItems: "center", overflow: "hidden" }}>
       <div style={{
-        flexShrink: 0, display: "flex", alignItems: "center", gap: 5,
-        padding: "0 12px", borderRight: "1px solid #1a1a1a", height: "100%",
+        flexShrink: 0, display: "flex", alignItems: "center", gap: 6,
+        padding: "0 16px", borderRight: "1px solid var(--border)", height: "100%", backgroundColor: "rgba(255,0,0,0.05)"
       }}>
-        <span style={{ width: 5, height: 5, borderRadius: "50%", backgroundColor: "#ef4444", display: "inline-block", animation: "pulse-dot 1.5s ease-in-out infinite" }} />
-        <span style={{ fontSize: 9, fontWeight: 700, color: "#ef4444", letterSpacing: "0.2em" }}>LIVE</span>
+        <span style={{ width: 6, height: 6, backgroundColor: "var(--red)", display: "inline-block" }} className="pulse-dot" />
+        <span style={{ fontSize: 10, fontWeight: 800, color: "var(--red)", letterSpacing: "0.2em", fontFamily: "var(--font-mono-data)" }}>LIVE FEED</span>
       </div>
 
-      {/* scrolling */}
       <div style={{ flex: 1, overflow: "hidden" }}>
         <div style={{
           display: "inline-flex", alignItems: "center", gap: 32, whiteSpace: "nowrap",
-          animation: `ticker-move ${items.length * 6}s linear infinite`,
+          animation: `ticker-move ${items.length * 5}s linear infinite`,
         }}>
           {doubled.map((item, i) => (
-            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11 }}>
-              <span style={{ fontFamily: "monospace", fontWeight: 700, color: scoreColor(item.score) }}>
+            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: 8, fontSize: 11, fontFamily: "var(--font-mono-data)" }}>
+              <span style={{ fontWeight: 800, color: scoreColor(item.score) }}>
                 [{item.score}]
               </span>
-              <span style={{ color: "#aaa" }}>{item.text}</span>
-              <span style={{ color: "#333" }}>· {item.source.slice(0, 20)}</span>
-              <span style={{ color: "#222", margin: "0 8px" }}>—</span>
+              <span style={{ color: "var(--text1)", fontWeight: 600 }}>{item.text}</span>
+              <span style={{ color: "var(--text2)" }}>// {item.source.slice(0, 20)}</span>
+              <span style={{ color: "var(--border)", margin: "0 8px" }}>|</span>
             </span>
           ))}
         </div>

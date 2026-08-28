@@ -14,79 +14,62 @@ export function KairosScorePanel({ clusters, kairosIndex }: Props) {
   const top5 = [...clusters].sort((a, b) => b.kairos_score - a.kairos_score).slice(0, 5)
 
   return (
-    <div style={{
-      height: "100%", display: "flex", flexDirection: "column",
-      backgroundColor: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, overflow: "hidden",
-    }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{
-        padding: "10px 14px", borderBottom: "1px solid #1a1a1a",
+        padding: "12px 16px", borderBottom: "1px solid var(--border)",
         display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0,
       }}>
-        <span style={{ fontSize: 10, fontWeight: 800, color: "#888", letterSpacing: "0.15em" }}>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "var(--cyan)", letterSpacing: "0.15em", fontFamily: "var(--font-mono-data)" }}>
           RISK CLUSTERS
         </span>
-        <span style={{ fontSize: 9, color: "#555", fontFamily: "monospace", fontWeight: 600 }}>
-          {clusters.length} active
+        <span style={{ fontSize: 10, color: "var(--text2)", fontFamily: "var(--font-mono-data)" }}>
+          {clusters.length} ACTIVE
         </span>
       </div>
 
-      {kairosIndex && (
-        <div style={{
-          padding: "12px 14px", borderBottom: "1px solid #1a1a1a",
-          display: "flex", alignItems: "center", gap: 14, flexShrink: 0,
-        }}>
-          <ScoreRing score={kairosIndex.index_value} size={68} />
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1, minWidth: 0 }}>
-            {[
-              { label: "Region", value: kairosIndex.highest_risk_region },
-              { label: "Commodity", value: kairosIndex.highest_risk_commodity },
-              { label: "Clusters", value: String(kairosIndex.active_clusters) },
-            ].map(({ label, value }) => (
-              <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 10, color: "#555", fontWeight: 500 }}>{label}</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#bbb", textAlign: "right", maxWidth: 120, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       <div style={{ flex: 1, overflowY: "auto" }}>
         {top5.length === 0 ? (
-          <div style={{ padding: 20, textAlign: "center", fontSize: 11, color: "#333" }}>
-            No active clusters
+          <div style={{ padding: 20, textAlign: "center", fontSize: 12, color: "var(--text3)", fontFamily: "var(--font-mono-data)" }}>
+            AWAITING SIGNAL DATA...
           </div>
         ) : (
           top5.map((c) => {
             const color = scoreColor(c.kairos_score)
             return (
               <div key={c.cluster_id} style={{
-                padding: "10px 14px",
-                borderBottom: "1px solid #111",
-                borderLeft: `2px solid ${color}`,
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8, marginBottom: 5 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#ddd", lineHeight: 1.3, flex: 1 }}>
+                padding: "14px 16px",
+                borderBottom: "1px solid var(--border)",
+                borderLeft: `3px solid ${color}`,
+                backgroundColor: "rgba(0,0,0,0.2)",
+                transition: "background 0.2s"
+              }}
+              onMouseEnter={e => e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.03)"}
+              onMouseLeave={e => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.2)"}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10, marginBottom: 6 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text1)", lineHeight: 1.4, flex: 1 }}>
                     {c.theme}
                   </span>
-                  <span style={{ fontSize: 18, fontWeight: 900, color, fontFamily: "monospace", flexShrink: 0 }}>
+                  <span style={{ fontSize: 20, fontWeight: 700, color, fontFamily: "var(--font-mono-data)", flexShrink: 0 }}>
                     {c.kairos_score}
                   </span>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 6 }}>
                   <Badge label={c.risk_status} type="status" value={c.risk_status} size="sm" />
                   {c.primary_regions[0] && (
-                    <span style={{ fontSize: 9, color: "#666", fontFamily: "monospace", fontWeight: 600 }}>
+                    <span style={{ fontSize: 10, color: "var(--text2)", fontFamily: "var(--font-mono-data)" }}>
                       {c.primary_regions[0]}
                     </span>
                   )}
                   {c.velocity > 0.5 && (
-                    <span style={{ fontSize: 9, color: "#ef4444", fontFamily: "monospace", fontWeight: 700 }}>↑ ACCEL</span>
+                    <span style={{ fontSize: 10, color: "var(--red)", fontFamily: "var(--font-mono-data)", fontWeight: 700 }}>
+                      [ACCELERATING]
+                    </span>
                   )}
                 </div>
                 {c.possible_outcome && (
                   <p style={{
-                    fontSize: 10, color: "#666", lineHeight: 1.5,
+                    fontSize: 11, color: "var(--text2)", lineHeight: 1.5,
                     overflow: "hidden", display: "-webkit-box",
                     WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any,
                   }}>

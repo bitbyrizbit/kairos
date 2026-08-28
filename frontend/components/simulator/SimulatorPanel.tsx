@@ -25,13 +25,13 @@ export function SimulatorPanel({ mode = "simulate" }: Props) {
   const run = async (description: string) => {
     setLoading(true)
     setError(null)
-    setResult(null) // clear previous result — fixes same graph issue
+    setResult(null)
     setLastQuery(description)
     try {
       const data = mode === "simulate" ? await api.simulate(description) : await api.analyze(description)
       setResult(data)
     } catch (err: any) {
-      setError(err?.response?.data?.detail || "Request failed. Is the backend running?")
+      setError(err?.response?.data?.detail || "REQUEST FAILED. CHECK SYSTEM UPLINK.")
     } finally {
       setLoading(false)
     }
@@ -42,34 +42,35 @@ export function SimulatorPanel({ mode = "simulate" }: Props) {
     setDownloading(true)
     try {
       const blob = await api.report(lastQuery, result.ripple_chain, result.kairos_score)
-      downloadBlob(blob, `kairos-${result.kairos_score}.pdf`)
+      downloadBlob(blob, `KAIROS_ARCHIVE_${result.kairos_score}.pdf`)
     } catch { /* silent */ }
     finally { setDownloading(false) }
   }
 
   return (
-    <div style={{ height: "100%", overflowY: "auto", padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
-      {/* header */}
+    <div style={{ height: "100%", overflowY: "auto", padding: 20, display: "flex", flexDirection: "column", gap: 20, backgroundColor: "rgba(0,0,0,0.4)" }}>
+      {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: "#e0e0e0", marginBottom: 4 }}>
-            {mode === "simulate" ? "What-If Simulator" : "Event Analyzer"}
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--text1)", marginBottom: 4, fontFamily: "var(--font-mono-data)", letterSpacing: "0.1em" }}>
+            {mode === "simulate" ? "// WHAT-IF SIMULATOR" : "// EVENT ANALYZER"}
           </h2>
-          <p style={{ fontSize: 11, color: "#444" }}>
-            {mode === "simulate" ? "Inject any hypothetical disruption and trace its global cascade" : "Analyze a real event and map its supply chain impact"}
+          <p style={{ fontSize: 12, color: "var(--text2)", fontFamily: "var(--font-mono-data)" }}>
+            {mode === "simulate" ? "INJECT HYPOTHETICAL DISRUPTION AND TRACE GLOBAL CASCADE" : "ANALYZE REAL EVENT AND MAP SUPPLY CHAIN IMPACT"}
           </p>
         </div>
         {result && (
           <button
+            className="panel-tactical-btn"
             onClick={download}
             disabled={downloading}
             style={{
-              padding: "6px 12px", borderRadius: 4, border: "1px solid #222",
-              fontSize: 10, fontFamily: "monospace", color: downloading ? "#333" : "#777",
-              backgroundColor: "#0d0d0d", cursor: downloading ? "not-allowed" : "pointer",
+              padding: "8px 16px", border: "1px solid var(--border)",
+              fontSize: 11, fontFamily: "var(--font-mono-data)", color: downloading ? "var(--text3)" : "var(--cyan)",
+              backgroundColor: "rgba(0, 229, 255, 0.05)", cursor: downloading ? "not-allowed" : "pointer",
             }}
           >
-            {downloading ? "Generating..." : "Export PDF"}
+            {downloading ? "GENERATING..." : "EXPORT ARCHIVE [PDF]"}
           </button>
         )}
       </div>
@@ -78,69 +79,72 @@ export function SimulatorPanel({ mode = "simulate" }: Props) {
 
       {error && (
         <div style={{
-          padding: "10px 14px", borderRadius: 4,
-          backgroundColor: "#1a0808", border: "1px solid #3a1010",
-          fontSize: 11, color: "#ef4444", fontFamily: "monospace",
+          padding: "12px 16px",
+          backgroundColor: "rgba(255, 51, 51, 0.1)", border: "1px solid var(--red)",
+          fontSize: 12, color: "var(--red)", fontFamily: "var(--font-mono-data)",
+          clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%)"
         }}>
-          ⚠ {error}
+          [!] {error}
         </div>
       )}
 
-      {loading && <LoadingPulse message="Running cascade simulation..." />}
+      {loading && <LoadingPulse message="COMPUTING CASCADE TRAJECTORY..." />}
 
       {result && !loading && (
-        <div style={{ display: "flex", flexDirection: "column", gap: 16, animation: "fade-up 0.3s ease-out" }}>
-          {/* score card */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 20, animation: "fade-up 0.4s ease-out" }}>
+          
           <div style={{
-            padding: 16, borderRadius: 6,
-            backgroundColor: "#0d0d0d", border: "1px solid #1a1a1a",
-            display: "flex", gap: 16, alignItems: "flex-start",
+            padding: 20,
+            backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid var(--border)",
+            display: "flex", gap: 20, alignItems: "flex-start",
+            clipPath: "polygon(0 8px, 8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%)"
           }}>
-            <ScoreRing score={result.kairos_score} size={76} />
+            <ScoreRing score={result.kairos_score} size={80} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 12 }}>
                 <Badge label={result.risk_status} type="status" value={result.risk_status} />
-                <span style={{ fontSize: 10, color: "#555", fontFamily: "monospace" }}>
-                  {result.parsed_event.origin_region} · {result.parsed_event.affected_commodity}
+                <span style={{ fontSize: 11, color: "var(--cyan)", fontFamily: "var(--font-mono-data)", fontWeight: 700 }}>
+                  {result.parsed_event.origin_region} / {result.parsed_event.affected_commodity}
                 </span>
               </div>
-              <p style={{ fontSize: 12, color: "#999", lineHeight: 1.6 }}>{result.crisis_narrative}</p>
+              <p style={{ fontSize: 13, color: "var(--text1)", lineHeight: 1.6, fontFamily: "var(--font-body)" }}>{result.crisis_narrative}</p>
             </div>
           </div>
 
-          {/* graph + timeline */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, height: 340 }}>
-            <RippleGraph ripple={result.ripple_chain} isAnimating={true} />
-            <CrisisTimeline ripple={result.ripple_chain} event={lastQuery} />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, height: 400 }}>
+            <div style={{ border: "1px solid var(--border)", position: "relative" }}>
+               <RippleGraph ripple={result.ripple_chain} isAnimating={true} />
+            </div>
+            <div style={{ border: "1px solid var(--border)", position: "relative" }}>
+               <CrisisTimeline ripple={result.ripple_chain} event={lastQuery} />
+            </div>
           </div>
 
-          {/* actions */}
           {(result.recommended_actions ?? []).length > 0 && (
-            <div style={{ padding: 16, borderRadius: 6, backgroundColor: "#0d0d0d", border: "1px solid #1a1a1a" }}>
-              <div style={{ fontSize: 9, color: "#444", letterSpacing: "0.15em", marginBottom: 10 }}>RECOMMENDED ACTIONS</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+            <div style={{ padding: 20, backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid var(--border)" }}>
+              <div style={{ fontSize: 11, color: "var(--text2)", letterSpacing: "0.15em", marginBottom: 16, fontFamily: "var(--font-mono-data)", fontWeight: 700 }}>RECOMMENDED ACTIONS</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 {(result.recommended_actions ?? []).map((a, i) => (
                   <div key={i} style={{
-                    display: "flex", gap: 10, padding: "8px 12px", borderRadius: 4,
-                    backgroundColor: "#0a0a0a", border: "1px solid #1a1a1a",
+                    display: "flex", gap: 12, padding: "12px 16px",
+                    backgroundColor: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.05)",
                   }}>
-                    <span style={{ fontSize: 11, fontWeight: 900, color: "#f59e0b", fontFamily: "monospace", flexShrink: 0 }}>
-                      {String(i + 1).padStart(2, "0")}
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "var(--amber)", fontFamily: "var(--font-mono-data)", flexShrink: 0 }}>
+                      [0{i + 1}]
                     </span>
-                    <span style={{ fontSize: 11, color: "#888", lineHeight: 1.4 }}>{a}</span>
+                    <span style={{ fontSize: 12, color: "var(--text1)", lineHeight: 1.5 }}>{a}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* historical parallels */}
           {(result.similar_historical_events ?? []).length > 0 && (
-            <div style={{ padding: 16, borderRadius: 6, backgroundColor: "#0d0d0d", border: "1px solid #1a1a1a" }}>
-              <div style={{ fontSize: 9, color: "#444", letterSpacing: "0.15em", marginBottom: 8 }}>HISTORICAL PARALLELS</div>
+            <div style={{ padding: 20, backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid var(--border)" }}>
+              <div style={{ fontSize: 11, color: "var(--text2)", letterSpacing: "0.15em", marginBottom: 12, fontFamily: "var(--font-mono-data)", fontWeight: 700 }}>HISTORICAL PARALLELS</div>
               {(result.similar_historical_events ?? []).map((e, i) => (
-                <div key={i} style={{ display: "flex", gap: 8, padding: "4px 0", fontSize: 11, color: "#555" }}>
-                  <span style={{ color: "#2a2a2a" }}>—</span>{e}
+                <div key={i} style={{ display: "flex", gap: 10, padding: "6px 0", fontSize: 12, color: "var(--text1)", fontFamily: "var(--font-mono-data)" }}>
+                  <span style={{ color: "var(--cyan)" }}>{">"}</span>{e}
                 </div>
               ))}
             </div>
