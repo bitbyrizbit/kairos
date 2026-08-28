@@ -115,8 +115,8 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
       style={{ 
         position: "absolute", top: 40, left: 40, zIndex: 99999,
         display: "flex", alignItems: "center", 
-        fontFamily: "var(--font-serif)", fontSize: 42, 
-        fontWeight: 600, letterSpacing: "0.2em", color: "var(--ink)",
+        fontFamily: "system-ui, -apple-system, sans-serif", fontSize: 32, 
+        fontWeight: 300, letterSpacing: "0.2em", color: "var(--ink)",
         pointerEvents: "auto", userSelect: "none"
       }}
     >
@@ -126,17 +126,17 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
       <div 
         onClick={() => setIsHovered(!isHovered)}
         style={{ 
-          position: "relative", width: 42, height: 42, 
+          position: "relative", width: 36, height: 36, 
           display: "flex", alignItems: "center", justifyContent: "center",
-          margin: "0 4px", cursor: "pointer", 
+          cursor: "pointer", 
         }}
       >
         {/* The visual O */}
         <motion.div 
           animate={{ scale: isHovered ? 1.0 : 1 }}
           style={{ 
-            width: 32, height: 32, borderRadius: "50%", 
-            border: "2px solid var(--ink)",
+            width: 28, height: 28, borderRadius: "50%", 
+            border: "1px solid var(--ink)",
             backgroundColor: isHovered ? "var(--ink)" : "transparent",
             transition: "background-color 0.3s"
           }} 
@@ -144,7 +144,7 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
         
         {/* Expanding arc of navigation options */}
         {isHovered && (
-          <div style={{ position: "absolute", top: 21, left: 21 }}>
+          <div style={{ position: "absolute", top: 18, left: 18 }}>
             {views.map((v, i) => {
               // Arc calculation
               const angle = (i / (views.length - 1)) * 90
@@ -171,7 +171,7 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
                     border: "1px solid var(--border)",
                     color: currentView === v.id ? "var(--surface)" : "var(--ink-light)",
                     padding: "6px 14px", borderRadius: 20, cursor: "pointer",
-                    fontFamily: "var(--font-sans)", fontSize: 11, fontWeight: 500,
+                    fontFamily: "system-ui, -apple-system, sans-serif", fontSize: 11, fontWeight: 500,
                     boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
                     whiteSpace: "nowrap", letterSpacing: "0.05em"
                   }}
@@ -184,7 +184,8 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
         )}
       </div>
       
-      <span style={{ marginLeft: -30 }}>S</span>
+      {/* FIXED: Removed the negative margin that was causing the overlap! */}
+      <span style={{ marginLeft: 8 }}>S</span>
     </div>
   )
 }

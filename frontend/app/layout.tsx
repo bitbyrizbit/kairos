@@ -1,17 +1,5 @@
 import type { Metadata } from "next"
-import { Cinzel, JetBrains_Mono } from "next/font/google"
 import "./globals.css"
-
-const cinzel = Cinzel({ 
-  weight: ["400", "500", "600"],
-  subsets: ["latin"], 
-  variable: "--font-serif" 
-})
-const jetbrains = JetBrains_Mono({ 
-  weight: ["300", "400", "500"],
-  subsets: ["latin"], 
-  variable: "--font-sans" 
-})
 
 export const metadata: Metadata = {
   title: "KAIROS",
@@ -21,8 +9,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${cinzel.variable} ${jetbrains.variable}`}>
-      <body>
+    <html lang="en">
+      <body style={{ fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" }}>
         {children}
       </body>
     </html>

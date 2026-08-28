@@ -109,9 +109,9 @@ export function WorldMap({ ripple, clusters }: Props) {
           
         countryPaths.on("mouseenter", function(this: any) {
             d3.select(this)
-              .attr("stroke", "#ff3333")
+              .attr("stroke", "transparent") // NO RED LINE!
               .attr("stroke-width", 2)
-              .style("filter", "drop-shadow(0px 0px 12px rgba(255, 51, 51, 0.9))")
+              .style("filter", "drop-shadow(0px 0px 15px rgba(255, 51, 51, 1))") // ONLY SMOKE
               .raise() // bring to front so stroke doesn't get clipped by neighbors
           })
           .on("mouseleave", function(this: any) {
