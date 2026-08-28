@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import { scoreColor } from "@/lib/utils"
 import type { RippleChain, SignalCluster } from "@/types"
 
 interface Props {
@@ -18,6 +17,11 @@ const NODE_TO_ISO: Record<string, number> = {
 const ROUTE_POSITIONS: Record<string, [number, number]> = {
   TR_SUEZ: [54, 42], TR_MALACCA: [74, 52], TR_HORMUZ: [61, 44], TR_PANAMA: [22, 50],
   TR_BOSPHORUS: [54, 32], TR_SOUTHCHINA: [76, 46],
+}
+
+// Minimal editorial color scale
+function severityIntensity(score: number): number {
+  return score; // 0 to 1
 }
 
 export function WorldMap({ ripple, clusters }: Props) {
@@ -61,21 +65,21 @@ export function WorldMap({ ripple, clusters }: Props) {
         const W = window.innerWidth
         const H = window.innerHeight
 
-        const projection = d3.geoNaturalEarth1().scale(W / 6.2).translate([W / 2, H / 2]).precision(0.1)
+        const projection = d3.geoNaturalEarth1().scale(W / 6).translate([W / 1.7, H / 2]).precision(0.1)
         const path = d3.geoPath().projection(projection)
 
         const g = svg.append("g")
         gRef.current = g
 
-        const zoom = d3.zoom<SVGSVGElement, unknown>().scaleExtent([1, 8]).translateExtent([[0, 0], [W, H]])
+        const zoom = d3.zoom<SVGSVGElement, unknown>().scaleExtent([1, 6]).translateExtent([[0, 0], [W, H]])
           .on("zoom", (event) => g.attr("transform", event.transform.toString()))
         svg.call(zoom as any)
         zoomRef.current = zoom
 
-        // Graticule
+        // Graticule - very subtle
         const graticule = d3.geoGraticule()
         g.append("path").datum(graticule()).attr("d", path as any).attr("fill", "none")
-          .attr("stroke", "rgba(255,255,255,0.03)").attr("stroke-width", 0.5)
+          .attr("stroke", "var(--border)").attr("stroke-width", 0.5)
 
         // @ts-ignore
         const countries = topojson.feature(world, world.objects.countries)
@@ -85,36 +89,21 @@ export function WorldMap({ ripple, clusters }: Props) {
           .attr("d", path as any)
           .attr("fill", (d: any) => {
             const nodeId = numericToNode[+d.id]
-            if (!nodeId || !active[nodeId]) return "#050505"
-            return scoreColor(Math.round(active[nodeId].severity * 100))
+            if (!nodeId || !active[nodeId]) return "#fcfcfc"
+            // The more severe, the darker the gray
+            const v = Math.round(240 - (active[nodeId].severity * 140))
+            return `rgb(${v},${v},${v})`
           })
-          .attr("fill-opacity", (d: any) => {
-            const nodeId = numericToNode[+d.id]
-            if (!nodeId || !active[nodeId]) return 0.2
-            return 0.15 + active[nodeId].severity * 0.4
-          })
-          .attr("stroke", (d: any) => {
-            const nodeId = numericToNode[+d.id]
-            if (!nodeId || !active[nodeId]) return "rgba(255,255,255,0.1)"
-            return scoreColor(Math.round(active[nodeId].severity * 100))
-          })
-          .attr("stroke-width", (d: any) => {
-            const nodeId = numericToNode[+d.id]
-            return (!nodeId || !active[nodeId]) ? 0.3 : 1.5
-          })
-          .style("filter", (d: any) => {
-            const nodeId = numericToNode[+d.id]
-            return (!nodeId || !active[nodeId]) ? "none" : "drop-shadow(0 0 4px rgba(255,0,50,0.5))"
-          })
+          .attr("stroke", "var(--border)")
+          .attr("stroke-width", 0.5)
 
         // Routes
         for (const [nodeId, [px, py]] of Object.entries(ROUTE_POSITIONS)) {
           if (!active[nodeId]) continue
           const x = (px / 100) * W
           const y = (py / 100) * H
-          const c = scoreColor(Math.round(active[nodeId].severity * 100))
-          g.append("circle").attr("cx", x).attr("cy", y).attr("r", 12).attr("fill", c).attr("fill-opacity", 0.1)
-          g.append("circle").attr("cx", x).attr("cy", y).attr("r", 4).attr("fill", c).attr("stroke", "#000").attr("stroke-width", 1)
+          g.append("circle").attr("cx", x).attr("cy", y).attr("r", 12).attr("fill", "transparent").attr("stroke", "var(--border)")
+          g.append("circle").attr("cx", x).attr("cy", y).attr("r", 3).attr("fill", "var(--ink)")
         }
       } catch (err) { console.log("Map load error:", err) }
     }
@@ -122,7 +111,7 @@ export function WorldMap({ ripple, clusters }: Props) {
   }, [mounted, ripple, clusters])
 
   return (
-    <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 0, pointerEvents: "none" }}>
+    <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 0, pointerEvents: "none", opacity: 0.8 }}>
       <svg ref={svgRef} style={{ width: "100%", height: "100%" }} />
     </div>
   )

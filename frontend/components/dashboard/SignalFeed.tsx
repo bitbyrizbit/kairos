@@ -1,6 +1,6 @@
 "use client"
 
-import { formatTime, scoreColor } from "@/lib/utils"
+import { formatTime } from "@/lib/utils"
 import type { SignalCluster } from "@/types"
 
 interface Props {
@@ -27,58 +27,54 @@ export function SignalFeed({ clusters, lastUpdated }: Props) {
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{
-        padding: "12px 16px", borderBottom: "1px solid var(--border)",
+        padding: "16px 24px", borderBottom: "1px solid var(--border)",
         display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0,
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ width: 6, height: 6, backgroundColor: "var(--red)", display: "inline-block" }} className="pulse-dot" />
-          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text1)", letterSpacing: "0.15em", fontFamily: "var(--font-mono-data)" }}>
-            RAW SIGNAL STREAM
-          </span>
-        </div>
-        <span style={{ fontSize: 10, color: "var(--text2)", fontFamily: "var(--font-mono-data)" }}>
+        <h2 style={{ fontSize: 16, fontFamily: "var(--font-serif)", fontStyle: "italic", fontWeight: 400, color: "var(--ink)", margin: 0 }}>
+          Global discourse
+        </h2>
+        <span style={{ fontSize: 11, color: "var(--ink-light)", fontFamily: "var(--font-sans)" }}>
           {lastUpdated ? formatTime(lastUpdated) : "—"}
         </span>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "12px 0" }}>
         {top.length === 0 ? (
-          <div style={{ padding: 20, textAlign: "center", fontSize: 11, color: "var(--text3)", fontFamily: "var(--font-mono-data)" }}>
-            SCANNING FEEDS...
+          <div style={{ padding: 40, textAlign: "center", fontSize: 13, color: "var(--ink-lighter)", fontFamily: "var(--font-sans)" }}>
+            Aggregating sources...
           </div>
         ) : (
           top.map((s, i) => (
             <a
               key={i} href={s.url || "#"} target="_blank" rel="noopener noreferrer"
               style={{
-                display: "block", padding: "10px 16px",
-                borderBottom: "1px solid rgba(255,255,255,0.03)",
+                display: "block", padding: "14px 24px",
+                borderBottom: "1px solid var(--border)",
                 textDecoration: "none",
-                transition: "background 0.2s",
+                transition: "background 0.3s",
               }}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)")}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = "var(--surface-hover)")}
               onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 10, alignItems: "flex-start" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
                 <p style={{
-                  fontSize: 12, fontWeight: 600, color: "var(--text1)", lineHeight: 1.45, flex: 1,
-                  overflow: "hidden", display: "-webkit-box",
-                  WebkitLineClamp: 2, WebkitBoxOrient: "vertical" as any,
+                  fontSize: 14, fontWeight: 400, color: "var(--ink)", lineHeight: 1.5, flex: 1,
+                  fontFamily: "var(--font-sans)",
                 }}>
                   {s.headline}
                 </p>
-                <span style={{ fontSize: 14, fontWeight: 700, color: scoreColor(s.score), fontFamily: "var(--font-mono-data)", flexShrink: 0 }}>
+                <span style={{ fontSize: 14, fontWeight: 300, color: "var(--ink)", fontFamily: "var(--font-serif)", fontStyle: "italic", flexShrink: 0 }}>
                   {s.score}
                 </span>
               </div>
-              <div style={{ display: "flex", gap: 8, marginTop: 6, alignItems: "center" }}>
-                <span style={{ fontSize: 10, color: "var(--cyan)", fontFamily: "var(--font-mono-data)", fontWeight: 600 }}>
+              <div style={{ display: "flex", gap: 8, marginTop: 8, alignItems: "center" }}>
+                <span style={{ fontSize: 11, color: "var(--ink-light)", fontFamily: "var(--font-sans)", fontWeight: 500 }}>
                   {s.source}
                 </span>
-                <span style={{ fontSize: 10, color: "var(--border)" }}>/</span>
+                <span style={{ fontSize: 11, color: "var(--border)" }}>/</span>
                 <span style={{
-                  fontSize: 10, fontWeight: 500,
-                  color: "var(--text2)", fontFamily: "var(--font-mono-data)",
+                  fontSize: 11, fontWeight: 400,
+                  color: "var(--ink-lighter)", fontFamily: "var(--font-sans)",
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 160,
                 }}>
                   {s.theme}

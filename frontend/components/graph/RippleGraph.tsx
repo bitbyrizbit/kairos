@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { impactColor } from "@/lib/utils"
 import type { RippleChain } from "@/types"
 
 interface Props {
@@ -16,12 +15,10 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
 
   useEffect(() => {
     if (!containerRef.current) return
-
     if (cyRef.current) {
       cyRef.current.destroy()
       cyRef.current = null
     }
-
     if (!ripple) return
 
     const init = async () => {
@@ -37,7 +34,6 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
           label: ripple.origin_node,
           fullLabel: ripple.origin_node,
           type: "origin",
-          companies: "",
         }
       })
 
@@ -50,9 +46,6 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
               fullLabel: hop.node_label,
               type: hop.impact,
               hop: hop.hop,
-              severity: hop.severity_score,
-              time: hop.time_to_impact,
-              companies: hop.affected_companies.join(", "),
               region: hop.region,
             }
           })
@@ -65,7 +58,6 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
             data: {
               id: `e-${src}-${hop.node_id}`,
               source: src, target: hop.node_id,
-              impact: hop.impact,
             }
           })
         }
@@ -78,54 +70,36 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
           {
             selector: "node",
             style: {
-              "shape": "diamond",
-              "background-color": (ele: any) => ele.data("type") === "origin" ? "#FF3333" : "rgba(15, 15, 18, 0.9)",
-              "border-color": (ele: any) => {
-                const t = ele.data("type")
-                if (t === "origin") return "#FF3333"
-                return impactColor(t)
-              },
-              "border-width": (ele: any) => ele.data("type") === "origin" ? 2 : 1.5,
+              "shape": "ellipse",
+              "background-color": (ele: any) => ele.data("type") === "origin" ? "#111" : "#fff",
+              "border-color": "#111",
+              "border-width": 1,
               "label": "data(label)",
-              "color": "#F2F2F2",
+              "color": "#111",
               "font-size": "10px",
-              "font-family": "monospace",
-              "font-weight": "bold",
+              "font-family": "var(--font-sans)",
               "text-valign": "bottom",
               "text-margin-y": 6,
-              "width": (ele: any) => ele.data("type") === "origin" ? 40 : 25,
-              "height": (ele: any) => ele.data("type") === "origin" ? 40 : 25,
-            }
-          },
-          {
-            selector: "node:hover",
-            style: {
-              "border-width": 3,
-              "background-color": (ele: any) => {
-                const t = ele.data("type")
-                if (t === "origin") return "#FF3333"
-                return "rgba(255,255,255,0.1)"
-              },
+              "width": (ele: any) => ele.data("type") === "origin" ? 24 : 12,
+              "height": (ele: any) => ele.data("type") === "origin" ? 24 : 12,
             }
           },
           {
             selector: "edge",
             style: {
-              "width": 1.5,
-              "line-color": "rgba(255,255,255,0.15)",
-              "target-arrow-color": "rgba(255,255,255,0.3)",
-              "target-arrow-shape": "triangle",
-              "curve-style": "taxi",
-              "taxi-direction": "downward",
+              "width": 1,
+              "line-color": "#e0e0dd",
+              "target-arrow-color": "#111",
+              "target-arrow-shape": "vee",
+              "curve-style": "bezier",
               "arrow-scale": 0.8,
-              "opacity": 0.8,
             }
           },
         ],
         layout: {
           name: "breadthfirst",
           directed: true,
-          padding: 30,
+          padding: 40,
           spacingFactor: 1.8,
           animate: false,
         },
@@ -137,88 +111,56 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
       cy.on("mouseover", "node", (evt: any) => {
         const node = evt.target
         const pos = evt.renderedPosition
-        const data = node.data()
-        const lines = [
-          data.fullLabel,
-          data.region ? `REGION: ${data.region}` : null,
-          data.time ? `IMPACT: ${data.time}` : null,
-          data.severity ? `SEVERITY: ${Math.round(data.severity * 100)}` : null,
-          data.companies ? `COMPANIES: ${data.companies}` : null,
-        ].filter(Boolean).join("\n")
-        setTooltip({ x: pos.x, y: pos.y - 10, content: lines })
+        setTooltip({ x: pos.x, y: pos.y - 10, content: node.data("fullLabel") })
       })
 
       cy.on("mouseout", "node", () => setTooltip(null))
-
       cyRef.current = cy
 
       if (isAnimating) {
         cy.nodes().style("opacity", 0)
         cy.edges().style("opacity", 0)
         cy.getElementById(ripple.origin_node).style("opacity", 1)
-
         let i = 0
         const timer = setInterval(() => {
           if (i >= ripple.hops.length) { clearInterval(timer); return }
           const hop = ripple.hops[i]
-          cy.getElementById(hop.node_id).animate({ style: { opacity: 1 } }, { duration: 200 })
-          cy.edges(`[target = "${hop.node_id}"]`).animate({ style: { opacity: 1 } }, { duration: 200 })
+          cy.getElementById(hop.node_id).animate({ style: { opacity: 1 } }, { duration: 300 })
+          cy.edges(`[target = "${hop.node_id}"]`).animate({ style: { opacity: 1 } }, { duration: 300 })
           i++
         }, 150)
       }
     }
-
     init()
-
-    return () => {
-      if (cyRef.current) { cyRef.current.destroy(); cyRef.current = null }
-    }
+    return () => { if (cyRef.current) { cyRef.current.destroy(); cyRef.current = null } }
   }, [ripple])
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{
-        padding: "12px 16px", borderBottom: "1px solid var(--border)",
+        padding: "16px 24px", borderBottom: "1px solid var(--border)",
         display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0,
       }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text2)", letterSpacing: "0.15em", fontFamily: "var(--font-mono-data)" }}>RIPPLE CASCADE</span>
-        {ripple && (
-          <span style={{ fontSize: 10, color: "var(--cyan)", fontFamily: "var(--font-mono-data)", fontWeight: 700 }}>
-            {ripple.total_hops} HOPS / {ripple.total_affected_nodes} NODES
-          </span>
-        )}
+        <h2 style={{ fontSize: 16, fontFamily: "var(--font-serif)", fontStyle: "italic", fontWeight: 400, color: "var(--ink)", margin: 0 }}>
+          Simulation cascade
+        </h2>
       </div>
 
-      {!ripple ? (
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
-          <div style={{ width: 100, height: 100, border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", transform: "rotate(45deg)" }}>
-            <div style={{ width: 60, height: 60, border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div style={{ width: 8, height: 8, backgroundColor: "var(--red)" }} className="pulse-dot" />
-            </div>
+      <div style={{ flex: 1, position: "relative" }}>
+        <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+        {tooltip && (
+          <div style={{
+            position: "absolute",
+            left: tooltip.x + 10, top: tooltip.y - 30,
+            padding: "4px 8px", background: "var(--surface)", border: "1px solid var(--border)",
+            fontSize: 12, fontFamily: "var(--font-sans)", color: "var(--ink)",
+            pointerEvents: "none", zIndex: 20, boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+            borderRadius: 2,
+          }}>
+            {tooltip.content}
           </div>
-          <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text3)", fontFamily: "var(--font-mono-data)", marginTop: 20 }}>
-            AWAITING EVENT...
-          </span>
-        </div>
-      ) : (
-        <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
-          <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
-          {tooltip && (
-            <div style={{
-              position: "absolute",
-              left: Math.min(tooltip.x + 16, 240),
-              top: Math.max(tooltip.y - 70, 4),
-              padding: "10px 14px",
-              backgroundColor: "var(--bg2)", border: "1px solid var(--border)", backdropFilter: "blur(8px)",
-              fontSize: 10, fontFamily: "var(--font-mono-data)", color: "var(--text1)", fontWeight: 600,
-              pointerEvents: "none", zIndex: 20, whiteSpace: "pre", lineHeight: 1.6,
-              boxShadow: "0 8px 32px rgba(0,0,0,0.8)", clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))"
-            }}>
-              {tooltip.content}
-            </div>
-          )}
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
