@@ -85,33 +85,107 @@ export function WorldMap({ ripple, clusters }: Props) {
         const countries = topojson.feature(world, world.objects.countries)
         
         // @ts-ignore
-        g.selectAll(".country").data((countries as any).features).enter().append("path").attr("class", "country")
+        const countryPaths = g.selectAll(".country").data((countries as any).features).enter().append("path").attr("class", "country")
           .attr("d", path as any)
           .attr("fill", (d: any) => {
             const nodeId = numericToNode[+d.id]
             if (!nodeId || !active[nodeId]) return "#fcfcfc"
-            // The more severe, the darker the gray
-            const v = Math.round(240 - (active[nodeId].severity * 140))
+            const v = Math.round(240 - (active[nodeId].severity * 60))
             return `rgb(${v},${v},${v})`
           })
           .attr("stroke", "var(--border)")
           .attr("stroke-width", 0.5)
+          .style("transition", "stroke 0.8s ease, stroke-width 0.8s ease")
+          
+        countryPaths.on("mouseenter", function(this: any) {
+            d3.select(this)
+              .attr("stroke", "#ff3333")
+              .attr("stroke-width", 1.5)
+          })
+          .on("mouseleave", function(this: any) {
+            d3.select(this)
+              .attr("stroke", "var(--border)")
+              .attr("stroke-width", 0.5)
+          })
+
+        // Draw Markers (Score + Label) at centroids
+        countryPaths.each(function(this: any, d: any) {
+          const nodeId = numericToNode[+d.id]
+          if (!nodeId || !active[nodeId]) return
+          
+          const centroid = path.centroid(d)
+          if (isNaN(centroid[0]) || isNaN(centroid[1])) return
+
+          const [x, y] = centroid
+          const nodeData = active[nodeId]
+          const displayScore = Math.round(nodeData.severity * 100)
+
+          // Group for the pin
+          const pin = g.append("g")
+            .attr("transform", `translate(${x}, ${y})`)
+            .style("pointer-events", "none")
+
+          // Score text
+          pin.append("text")
+            .text(displayScore)
+            .attr("text-anchor", "middle")
+            .attr("y", -8)
+            .attr("font-family", "var(--font-sans)")
+            .attr("font-size", "14px")
+            .attr("font-weight", "600")
+            .attr("fill", "#000")
+
+          // Label text
+          pin.append("text")
+            .text(nodeData.label)
+            .attr("text-anchor", "middle")
+            .attr("y", 6)
+            .attr("font-family", "var(--font-sans)")
+            .attr("font-size", "10px")
+            .attr("font-weight", "400")
+            .attr("fill", "#666")
+            .attr("letter-spacing", "0.05em")
+        })
 
         // Routes
         for (const [nodeId, [px, py]] of Object.entries(ROUTE_POSITIONS)) {
           if (!active[nodeId]) continue
           const x = (px / 100) * W
           const y = (py / 100) * H
-          g.append("circle").attr("cx", x).attr("cy", y).attr("r", 12).attr("fill", "transparent").attr("stroke", "var(--border)")
-          g.append("circle").attr("cx", x).attr("cy", y).attr("r", 3).attr("fill", "var(--ink)")
+          const displayScore = Math.round(active[nodeId].severity * 100)
+
+          const pin = g.append("g")
+            .attr("transform", `translate(${x}, ${y})`)
+            .style("pointer-events", "none")
+
+          pin.append("circle").attr("r", 4).attr("fill", "#000")
+
+          pin.append("text")
+            .text(displayScore)
+            .attr("text-anchor", "middle")
+            .attr("y", -12)
+            .attr("font-family", "var(--font-sans)")
+            .attr("font-size", "14px")
+            .attr("font-weight", "600")
+            .attr("fill", "#000")
+            
+          pin.append("text")
+            .text(active[nodeId].label)
+            .attr("text-anchor", "middle")
+            .attr("y", 14)
+            .attr("font-family", "var(--font-sans)")
+            .attr("font-size", "10px")
+            .attr("font-weight", "400")
+            .attr("fill", "#666")
         }
       } catch (err) { console.log("Map load error:", err) }
     }
     draw()
   }, [mounted, ripple, clusters])
 
+  // Map is interactive now, so remove pointerEvents: none from container
   return (
-    <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 0, pointerEvents: "none", opacity: 0.8 }}>
+    <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 0 }}>
       <svg ref={svgRef} style={{ width: "100%", height: "100%" }} />
     </div>
   )

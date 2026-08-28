@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { WorldMap } from "@/components/graph/WorldMap"
-import { KairosScorePanel } from "@/components/dashboard/KairosScorePanel"
+
 import { SignalFeed } from "@/components/dashboard/SignalFeed"
 import { CrisisTimeline } from "@/components/dashboard/CrisisTimeline"
 import { RippleGraph } from "@/components/graph/RippleGraph"
@@ -32,8 +32,8 @@ export default function Home() {
         {/* Left Side: Dynamic Module based on View */}
         <div style={{ width: 340, display: "flex", flexDirection: "column", gap: 40, pointerEvents: "auto" }}>
           {view === "dashboard" && (
-            <div className="editorial-panel fade-in" style={{ flex: 1, overflow: "hidden" }}>
-              <KairosScorePanel clusters={signals?.clusters ?? []} kairosIndex={kairosIndex} />
+            <div style={{ flex: 1, pointerEvents: "none" }}>
+              {/* WorldMap is the hero now. We removed the old KairosScorePanel side panel. */}
             </div>
           )}
           {view === "signals" && (
@@ -78,6 +78,23 @@ export default function Home() {
       {/* Novel Interface: Interactive Logo Navbar */}
       <InteractiveLogo currentView={view} onChange={setView} />
       
+      {/* Global Index Display */}
+      <div style={{ position: "absolute", bottom: 40, left: 40, zIndex: 20, display: "flex", flexDirection: "column" }}>
+        <span style={{ fontSize: 11, fontFamily: "var(--font-sans)", color: "var(--ink-light)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
+          Global Stability Index
+        </span>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
+          <span style={{ fontSize: 48, fontFamily: "var(--font-serif)", fontWeight: 300, color: "var(--ink)", lineHeight: 1 }}>
+            {kairosIndex?.index_value ?? "--"}
+          </span>
+          {kairosIndex && (
+             <span style={{ fontSize: 14, fontFamily: "var(--font-sans)", color: "var(--ink-light)" }}>
+               {kairosIndex.status.charAt(0).toUpperCase() + kairosIndex.status.slice(1)}
+             </span>
+          )}
+        </div>
+      </div>
+      
       {/* Minimal Analyze Input floating bottom right */}
       {view === "dashboard" && (
          <div style={{ position: "absolute", bottom: 40, right: 40, zIndex: 20, width: 400 }}>
@@ -103,28 +120,28 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
       style={{ 
         position: "absolute", top: 40, left: 40, zIndex: 50,
         display: "flex", alignItems: "center", 
-        fontFamily: "var(--font-serif)", fontSize: 42, 
-        fontWeight: 600, letterSpacing: "0.15em", color: "var(--ink)",
-        pointerEvents: "auto"
+        fontFamily: "var(--font-serif)", fontSize: 32, 
+        fontWeight: 400, letterSpacing: "0.25em", color: "var(--ink)",
+        pointerEvents: "auto", userSelect: "none"
       }}
     >
-      <span>KAIR</span>
+      <span style={{ marginRight: -4 }}>KAIR</span>
       
       {/* The O which acts as the nav trigger */}
       <div 
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onClick={() => setIsHovered(!isHovered)}
         style={{ 
           position: "relative", width: 42, height: 42, 
           display: "flex", alignItems: "center", justifyContent: "center",
-          margin: "0 6px", cursor: "pointer"
+          margin: "0 6px", cursor: "pointer", 
         }}
       >
+        {/* The visual O */}
         <motion.div 
-          animate={{ scale: isHovered ? 1.1 : 1 }}
+          animate={{ scale: isHovered ? 1.0 : 1 }}
           style={{ 
-            width: 32, height: 32, borderRadius: "50%", 
-            border: "3px solid var(--ink)",
+            width: 22, height: 22, borderRadius: "50%", 
+            border: "2px solid var(--ink)",
             backgroundColor: isHovered ? "var(--ink)" : "transparent",
             transition: "background-color 0.3s"
           }} 
@@ -134,11 +151,10 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
         {isHovered && (
           <div style={{ position: "absolute", top: 21, left: 21 }}>
             {views.map((v, i) => {
-              // Calculate positions for a semi-circle arc opening downwards/rightwards
-              // 0 to 90 degrees
+              // Arc calculation
               const angle = (i / (views.length - 1)) * 90
               const rad = angle * (Math.PI / 180)
-              const radius = 120 // Distance from center
+              const radius = 100 // Distance from O
               const x = Math.cos(rad) * radius
               const y = Math.sin(rad) * radius
 
@@ -148,16 +164,21 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
                   initial={{ opacity: 0, x: 0, y: 0 }}
                   animate={{ opacity: 1, x, y }}
                   transition={{ delay: i * 0.05, type: "spring", stiffness: 200, damping: 20 }}
-                  onClick={() => onChange(v.id)}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onChange(v.id)
+                    setIsHovered(false)
+                  }}
                   style={{
                     position: "absolute",
                     transform: "translate(-50%, -50%)",
-                    background: "var(--surface)", border: "1px solid var(--border)",
-                    color: currentView === v.id ? "var(--ink)" : "var(--ink-light)",
-                    padding: "8px 16px", borderRadius: 20, cursor: "pointer",
-                    fontFamily: "var(--font-sans)", fontSize: 12, fontWeight: 500,
+                    background: currentView === v.id ? "var(--ink)" : "var(--surface)", 
+                    border: "1px solid var(--border)",
+                    color: currentView === v.id ? "var(--surface)" : "var(--ink-light)",
+                    padding: "6px 14px", borderRadius: 20, cursor: "pointer",
+                    fontFamily: "var(--font-sans)", fontSize: 11, fontWeight: 500,
                     boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                    whiteSpace: "nowrap"
+                    whiteSpace: "nowrap", letterSpacing: "0.05em"
                   }}
                 >
                   {v.label}
@@ -168,7 +189,7 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
         )}
       </div>
       
-      <span>S</span>
+      <span style={{ marginLeft: -30 }}>S</span>
     </div>
   )
 }
