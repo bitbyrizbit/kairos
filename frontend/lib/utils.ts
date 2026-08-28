@@ -32,10 +32,10 @@ export function scoreColor(score: number): string {
 }
 
 export function scoreLabel(score: number): string {
-  if (score >= 80) return "CATASTROPHIC"
-  if (score >= 65) return "CRITICAL"
-  if (score >= 45) return "ELEVATED"
-  return "STABLE"
+  if (score >= 80) return "Catastrophic"
+  if (score >= 65) return "Critical"
+  if (score >= 45) return "Elevated"
+  return "Stable"
 }
 
 export function formatTime(iso: string): string {

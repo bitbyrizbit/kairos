@@ -26,7 +26,7 @@ async def simulate_event(req: SimulateRequest):
     try:
         parsed = claude_service.parse_event(req.description)
     except Exception as e:
-        raise HTTPException(status_code=422, detail=f"Failed to parse event: {str(e)}")
+        raise HTTPException(status_code=502, detail=f"LLM Provider Error (Groq): {str(e)}")
 
     origin_node = parsed.get("primary_node_id", "SEMI")
     severity = parsed.get("severity", 0.5)

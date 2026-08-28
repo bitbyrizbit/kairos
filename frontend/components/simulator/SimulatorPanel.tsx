@@ -104,7 +104,7 @@ export function SimulatorPanel({ mode = "simulate", onAnalyze }: Props) {
               <span style={{ fontSize: 48, fontWeight: 300, color: "var(--ink)", fontFamily: "var(--font-serif)", fontStyle: "italic", lineHeight: 1 }}>
                 {result.kairos_score}
               </span>
-              <span style={{ fontSize: 10, color: "var(--ink-lighter)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Index Score</span>
+              <span style={{ fontSize: 11, color: "var(--ink-lighter)", letterSpacing: "0.02em", fontFamily: "var(--font-sans)" }}>Index score</span>
             </div>
             
             <div style={{ flex: 1, minWidth: 0, borderLeft: "1px solid var(--border)", paddingLeft: 32 }}>

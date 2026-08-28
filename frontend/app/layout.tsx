@@ -1,13 +1,15 @@
 import type { Metadata } from "next"
-import { Newsreader, Inter } from "next/font/google"
+import { Cormorant_Garamond, Lato } from "next/font/google"
 import "./globals.css"
 
-const newsreader = Newsreader({ 
+const cormorant = Cormorant_Garamond({ 
+  weight: ["300", "400", "500", "600", "700"],
   subsets: ["latin"], 
   style: ["normal", "italic"], 
   variable: "--font-serif" 
 })
-const inter = Inter({ 
+const lato = Lato({ 
+  weight: ["300", "400", "700"],
   subsets: ["latin"], 
   variable: "--font-sans" 
 })
@@ -20,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${newsreader.variable} ${inter.variable}`}>
+    <html lang="en" className={`${cormorant.variable} ${lato.variable}`}>
       <body>
         {children}
       </body>

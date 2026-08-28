@@ -20,14 +20,13 @@ export function Badge({ label, type = "default", value, size = "md" }: Props) {
       display: "inline-flex", alignItems: "center",
       padding: size === "sm" ? "3px 6px" : "4px 8px",
       fontSize: size === "sm" ? 10 : 11,
-      fontFamily: "var(--font-mono-data)", fontWeight: 700,
-      letterSpacing: "0.1em", textTransform: "uppercase",
-      color,
+      fontFamily: "var(--font-sans)", fontWeight: 400,
+      borderRadius: 3, color,
       backgroundColor: `${color}20`,
       border: `1px solid ${color}60`,
       clipPath: "polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))"
     }}>
-      {label}
+      {label.charAt(0).toUpperCase() + label.slice(1).toLowerCase()}
     </span>
   )
 }
