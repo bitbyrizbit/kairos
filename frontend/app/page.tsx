@@ -4,11 +4,6 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import { WorldMap } from "@/components/graph/WorldMap"
 
-import { SignalFeed } from "@/components/dashboard/SignalFeed"
-import { CrisisTimeline } from "@/components/dashboard/CrisisTimeline"
-import { RippleGraph } from "@/components/graph/RippleGraph"
-import { SimulatorPanel } from "@/components/simulator/SimulatorPanel"
-import { LoadingPulse } from "@/components/ui/LoadingPulse"
 import { useSignals } from "@/hooks/useSignals"
 import { useKairosScore } from "@/hooks/useKairosScore"
 import { useRipple } from "@/hooks/useRipple"
@@ -26,54 +21,54 @@ export default function Home() {
       {/* Background Layer: Map */}
       <WorldMap ripple={ripple?.ripple_chain ?? null} clusters={signals?.clusters ?? []} />
       
-      {/* Main Content Areas */}
-      <div style={{ position: "absolute", inset: "40px 40px 40px 320px", display: "flex", gap: 40, zIndex: 5, pointerEvents: "none" }}>
-        
-        {/* Left Side: Dynamic Module based on View */}
-        <div style={{ width: 340, display: "flex", flexDirection: "column", gap: 40, pointerEvents: "auto" }}>
-          {view === "dashboard" && (
-            <div style={{ flex: 1, pointerEvents: "none" }}>
-              {/* WorldMap is the hero now. We removed the old KairosScorePanel side panel. */}
-            </div>
-          )}
-          {view === "signals" && (
-            <div className="editorial-panel fade-in" style={{ flex: 1, overflow: "hidden" }}>
-               <SignalFeed clusters={signals?.clusters ?? []} lastUpdated={signals?.last_updated ?? ""} />
-            </div>
-          )}
-          {view === "simulator" && (
-            <div className="editorial-panel fade-in" style={{ flex: 1, overflow: "hidden" }}>
-               <SimulatorPanel mode="simulate" onAnalyze={analyze} />
-            </div>
-          )}
-          {view === "historical" && (
-            <div className="editorial-panel fade-in" style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-               <span style={{ fontFamily: "var(--font-sans)", color: "var(--ink-light)", fontSize: 13 }}>Archival data unavailable.</span>
-            </div>
-          )}
+      {/* Simulator Overlay: Pure floating text input, no boxes */}
+      {view === "simulator" && (
+        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 10, pointerEvents: "none" }}>
+           <input 
+             autoFocus
+             placeholder="Type disruption scenario..."
+             onKeyDown={e => {
+               if (e.key === "Enter" && e.currentTarget.value.trim() && !rippleLoading) {
+                 analyze(e.currentTarget.value)
+                 setView("dashboard")
+               }
+             }}
+             style={{
+               background: "transparent", border: "none", outline: "none",
+               borderBottom: "1px solid var(--ink)", color: "var(--ink)",
+               fontFamily: "var(--font-serif)", fontSize: 32, fontStyle: "italic",
+               width: 600, textAlign: "center", paddingBottom: 16, pointerEvents: "auto"
+             }}
+             disabled={rippleLoading}
+           />
+           {rippleLoading && (
+             <div style={{ marginTop: 24, fontSize: 13, fontFamily: "var(--font-sans)", color: "var(--ink-light)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+               Synthesizing Cascade...
+             </div>
+           )}
         </div>
+      )}
 
-        {/* Center/Right Canvas: Ripple Graph & Timeline (only shows when there's data) */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 40, pointerEvents: "auto" }}>
-          {view === "dashboard" && (ripple || rippleLoading) && (
-            <div className="editorial-panel fade-in" style={{ flex: 1, position: "relative" }}>
-              {rippleLoading ? (
-                <div style={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center" }}>
-                  <LoadingPulse message="Synthesizing cascade..." />
-                </div>
-              ) : (
-                <RippleGraph ripple={ripple?.ripple_chain ?? null} isAnimating={!!ripple} />
-              )}
-            </div>
-          )}
-          
-          {view === "dashboard" && ripple && !rippleLoading && (
-            <div className="editorial-panel fade-in" style={{ height: 280, overflow: "hidden" }}>
-              <CrisisTimeline ripple={ripple?.ripple_chain ?? null} event={ripple?.parsed_event?.event_summary ?? ""} />
-            </div>
-          )}
+      {/* Narrative Overlay: When a ripple finishes, show the text raw on the map */}
+      {view === "dashboard" && ripple && !rippleLoading && (
+        <div style={{ position: "absolute", right: 80, top: 120, width: 400, zIndex: 10, pointerEvents: "none" }}>
+          <h2 style={{ fontSize: 12, fontFamily: "var(--font-sans)", color: "var(--ink)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
+            Crisis Narrative
+          </h2>
+          <p style={{ fontSize: 18, fontFamily: "var(--font-serif)", color: "var(--ink)", lineHeight: 1.6 }}>
+            {ripple.crisis_narrative}
+          </p>
         </div>
-      </div>
+      )}
+
+      {/* Historical / Signals empty state */}
+      {(view === "historical" || view === "signals") && (
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10, pointerEvents: "none" }}>
+           <span style={{ fontSize: 14, fontFamily: "var(--font-sans)", color: "var(--ink-light)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+             {view === "historical" ? "Archival data unavailable" : "Map tracking active signals"}
+           </span>
+        </div>
+      )}
 
       {/* Novel Interface: Interactive Logo Navbar */}
       <InteractiveLogo currentView={view} onChange={setView} />
@@ -120,12 +115,12 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
       style={{ 
         position: "absolute", top: 40, left: 40, zIndex: 50,
         display: "flex", alignItems: "center", 
-        fontFamily: "var(--font-serif)", fontSize: 32, 
-        fontWeight: 400, letterSpacing: "0.25em", color: "var(--ink)",
+        fontFamily: "var(--font-serif)", fontSize: 36, 
+        fontWeight: 300, letterSpacing: "0.3em", color: "var(--ink)",
         pointerEvents: "auto", userSelect: "none"
       }}
     >
-      <span style={{ marginRight: -4 }}>KAIR</span>
+      <span style={{ marginRight: 2 }}>KAIR</span>
       
       {/* The O which acts as the nav trigger */}
       <div 
@@ -133,15 +128,15 @@ function InteractiveLogo({ currentView, onChange }: { currentView: View, onChang
         style={{ 
           position: "relative", width: 42, height: 42, 
           display: "flex", alignItems: "center", justifyContent: "center",
-          margin: "0 6px", cursor: "pointer", 
+          margin: "0 8px", cursor: "pointer", 
         }}
       >
         {/* The visual O */}
         <motion.div 
           animate={{ scale: isHovered ? 1.0 : 1 }}
           style={{ 
-            width: 22, height: 22, borderRadius: "50%", 
-            border: "2px solid var(--ink)",
+            width: 26, height: 26, borderRadius: "50%", 
+            border: "1.5px solid var(--ink)",
             backgroundColor: isHovered ? "var(--ink)" : "transparent",
             transition: "background-color 0.3s"
           }} 
