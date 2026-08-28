@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { impactColor, scoreColor } from "@/lib/utils"
+import { impactColor } from "@/lib/utils"
 import type { RippleChain } from "@/types"
 
 interface Props {
@@ -78,44 +78,33 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
           {
             selector: "node",
             style: {
-              "background-color": (ele: any) => ele.data("type") === "origin" ? "#f59e0b" : "#1a1a1a",
+              "shape": "diamond",
+              "background-color": (ele: any) => ele.data("type") === "origin" ? "#FF3333" : "rgba(15, 15, 18, 0.9)",
               "border-color": (ele: any) => {
                 const t = ele.data("type")
-                if (t === "origin") return "#f59e0b"
+                if (t === "origin") return "#FF3333"
                 return impactColor(t)
               },
-              "border-width": (ele: any) => ele.data("type") === "origin" ? 2.5 : 1.5,
+              "border-width": (ele: any) => ele.data("type") === "origin" ? 2 : 1.5,
               "label": "data(label)",
-              "color": "#cccccc",
+              "color": "#F2F2F2",
               "font-size": "10px",
               "font-family": "monospace",
-              "font-weight": 600,
+              "font-weight": "bold",
               "text-valign": "bottom",
-              "text-margin-y": 5,
-              "width": (ele: any) => {
-                const t = ele.data("type")
-                if (t === "origin") return 44
-                if (t === "critical") return 36
-                if (t === "high") return 30
-                return 24
-              },
-              "height": (ele: any) => {
-                const t = ele.data("type")
-                if (t === "origin") return 44
-                if (t === "critical") return 36
-                if (t === "high") return 30
-                return 24
-              },
+              "text-margin-y": 6,
+              "width": (ele: any) => ele.data("type") === "origin" ? 40 : 25,
+              "height": (ele: any) => ele.data("type") === "origin" ? 40 : 25,
             }
           },
           {
             selector: "node:hover",
             style: {
-              "border-width": 2.5,
+              "border-width": 3,
               "background-color": (ele: any) => {
                 const t = ele.data("type")
-                if (t === "origin") return "#f59e0b"
-                return "#252525"
+                if (t === "origin") return "#FF3333"
+                return "rgba(255,255,255,0.1)"
               },
             }
           },
@@ -123,20 +112,21 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
             selector: "edge",
             style: {
               "width": 1.5,
-              "line-color": "#2a2a2a",
-              "target-arrow-color": "#3a3a3a",
+              "line-color": "rgba(255,255,255,0.15)",
+              "target-arrow-color": "rgba(255,255,255,0.3)",
               "target-arrow-shape": "triangle",
-              "curve-style": "bezier",
-              "arrow-scale": 0.7,
-              "opacity": 0.7,
+              "curve-style": "taxi",
+              "taxi-direction": "downward",
+              "arrow-scale": 0.8,
+              "opacity": 0.8,
             }
           },
         ],
         layout: {
           name: "breadthfirst",
           directed: true,
-          padding: 24,
-          spacingFactor: 1.6,
+          padding: 30,
+          spacingFactor: 1.8,
           animate: false,
         },
         userZoomingEnabled: true,
@@ -144,17 +134,16 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
         boxSelectionEnabled: false,
       })
 
-      // node hover tooltip
       cy.on("mouseover", "node", (evt: any) => {
         const node = evt.target
         const pos = evt.renderedPosition
         const data = node.data()
         const lines = [
           data.fullLabel,
-          data.region ? `Region: ${data.region}` : null,
-          data.time ? `Impact: ${data.time}` : null,
-          data.severity ? `Severity: ${Math.round(data.severity * 100)}` : null,
-          data.companies ? `Companies: ${data.companies}` : null,
+          data.region ? `REGION: ${data.region}` : null,
+          data.time ? `IMPACT: ${data.time}` : null,
+          data.severity ? `SEVERITY: ${Math.round(data.severity * 100)}` : null,
+          data.companies ? `COMPANIES: ${data.companies}` : null,
         ].filter(Boolean).join("\n")
         setTooltip({ x: pos.x, y: pos.y - 10, content: lines })
       })
@@ -175,7 +164,7 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
           cy.getElementById(hop.node_id).animate({ style: { opacity: 1 } }, { duration: 200 })
           cy.edges(`[target = "${hop.node_id}"]`).animate({ style: { opacity: 1 } }, { duration: 200 })
           i++
-        }, 220)
+        }, 150)
       }
     }
 
@@ -187,62 +176,43 @@ export function RippleGraph({ ripple, isAnimating }: Props) {
   }, [ripple])
 
   return (
-    <div style={{
-      height: "100%", display: "flex", flexDirection: "column",
-      backgroundColor: "#0a0a0a", border: "1px solid #1a1a1a", borderRadius: 8, overflow: "hidden",
-    }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <div style={{
-        padding: "10px 14px", borderBottom: "1px solid #1a1a1a",
+        padding: "12px 16px", borderBottom: "1px solid var(--border)",
         display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0,
       }}>
-        <span style={{ fontSize: 10, fontWeight: 800, color: "#666", letterSpacing: "0.15em" }}>RIPPLE PROPAGATION</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text2)", letterSpacing: "0.15em", fontFamily: "var(--font-mono-data)" }}>RIPPLE CASCADE</span>
         {ripple && (
-          <span style={{ fontSize: 9, color: "#555", fontFamily: "monospace", fontWeight: 600 }}>
-            {ripple.total_hops} hops · {ripple.total_affected_nodes} nodes
+          <span style={{ fontSize: 10, color: "var(--cyan)", fontFamily: "var(--font-mono-data)", fontWeight: 700 }}>
+            {ripple.total_hops} HOPS / {ripple.total_affected_nodes} NODES
           </span>
         )}
       </div>
 
       {!ripple ? (
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
-          <div style={{ position: "relative", width: 60, height: 60 }}>
-            {[0, 1, 2].map(i => (
-              <div key={i} style={{
-                position: "absolute", inset: 0, borderRadius: "50%",
-                border: "1px solid #1a1a1a",
-                transform: `scale(${1 + i * 0.5})`,
-                opacity: 1 - i * 0.3,
-                animation: `pulse-dot ${1.5 + i * 0.4}s ease-in-out infinite`,
-                animationDelay: `${i * 0.3}s`,
-              }} />
-            ))}
-            <div style={{
-              position: "absolute", inset: 0, borderRadius: "50%",
-              backgroundColor: "#f59e0b15", border: "1px solid #f59e0b33",
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#f59e0b" }} />
+          <div style={{ width: 100, height: 100, border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", transform: "rotate(45deg)" }}>
+            <div style={{ width: 60, height: 60, border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ width: 8, height: 8, backgroundColor: "var(--red)" }} className="pulse-dot" />
             </div>
           </div>
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#333", fontFamily: "monospace" }}>
-            Awaiting disruption event
+          <span style={{ fontSize: 12, fontWeight: 600, color: "var(--text3)", fontFamily: "var(--font-mono-data)", marginTop: 20 }}>
+            AWAITING EVENT...
           </span>
         </div>
       ) : (
         <div style={{ flex: 1, minHeight: 0, position: "relative" }}>
           <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
-          {/* node tooltip */}
           {tooltip && (
             <div style={{
               position: "absolute",
-              left: Math.min(tooltip.x + 12, 240),
-              top: Math.max(tooltip.y - 60, 4),
-              padding: "6px 10px", borderRadius: 4,
-              backgroundColor: "#0d0d0d", border: "1px solid #2a2a2a",
-              fontSize: 10, fontFamily: "monospace", color: "#ccc",
-              pointerEvents: "none", zIndex: 20,
-              whiteSpace: "pre", lineHeight: 1.6,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+              left: Math.min(tooltip.x + 16, 240),
+              top: Math.max(tooltip.y - 70, 4),
+              padding: "10px 14px",
+              backgroundColor: "var(--bg2)", border: "1px solid var(--border)", backdropFilter: "blur(8px)",
+              fontSize: 10, fontFamily: "var(--font-mono-data)", color: "var(--text1)", fontWeight: 600,
+              pointerEvents: "none", zIndex: 20, whiteSpace: "pre", lineHeight: 1.6,
+              boxShadow: "0 8px 32px rgba(0,0,0,0.8)", clipPath: "polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))"
             }}>
               {tooltip.content}
             </div>
