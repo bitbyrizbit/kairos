@@ -103,7 +103,7 @@ export function WorldMap({ ripple, clusters }: Props) {
           const entry = Object.entries(numericToNode).find(([num, id]) => id === nodeId)
           if (!entry) return null
           // @ts-ignore
-          const feature = countries.features.find((f: any) => +f.id === +entry[0])
+          const feature = (countries as any).features.find((f: any) => +f.id === +entry[0])
           if (!feature) return null
           const centroid = path.centroid(feature)
           if (isNaN(centroid[0])) return null
@@ -141,7 +141,7 @@ export function WorldMap({ ripple, clusters }: Props) {
         // Draw animated ripple lines if a ripple cascade is active
         if (ripple) {
           const originEntry = Object.entries(numericToNode).find(([_, id]) => id === ripple.origin_node)
-          const originFeature = originEntry ? countries.features.find((f: any) => +f.id === +originEntry[0]) : null
+          const originFeature = originEntry ? (countries as any).features.find((f: any) => +f.id === +originEntry[0]) : null
           const originCentroid = originFeature ? path.centroid(originFeature) : null
 
           if (originCentroid && !isNaN(originCentroid[0])) {
@@ -149,7 +149,7 @@ export function WorldMap({ ripple, clusters }: Props) {
             
             for (const hop of ripple.hops) {
               const targetEntry = Object.entries(numericToNode).find(([_, id]) => id === hop.node_id)
-              const targetFeature = targetEntry ? countries.features.find((f: any) => +f.id === +targetEntry[0]) : null
+              const targetFeature = targetEntry ? (countries as any).features.find((f: any) => +f.id === +targetEntry[0]) : null
               const targetCentroid = targetFeature ? path.centroid(targetFeature) : null
               
               if (targetCentroid && !isNaN(targetCentroid[0])) {
