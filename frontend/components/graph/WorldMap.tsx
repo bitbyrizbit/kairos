@@ -35,7 +35,7 @@ export function WorldMap({ ripple, clusters }: Props) {
     active[ripple.origin_node] = { severity: 1.0, label: ripple.origin_node, description: "Epicenter of cascading disruption." }
     for (const hop of ripple.hops) {
       if (NODE_TO_ISO[hop.node_id] || ROUTE_POSITIONS[hop.node_id]) {
-        active[hop.node_id] = { severity: hop.severity_score, label: hop.node_label, description: hop.impact_description }
+        active[hop.node_id] = { severity: hop.severity_score, label: hop.node_label, description: hop.explanation }
       }
     }
   }

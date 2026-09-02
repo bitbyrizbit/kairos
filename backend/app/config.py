@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     # -- API Keys --
     groq_api_key: str
     news_api_key: str
+    supabase_url: str
+    supabase_key: str
 
     # -- CORS --
     cors_origins: str = "http://localhost:3000"
