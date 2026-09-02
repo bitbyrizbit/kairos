@@ -3,16 +3,44 @@
 @tailwind utilities;
 
 :root {
-  --bg: #f9f9f8;
-  --surface: #ffffff;
-  --surface-hover: #f0f0ee;
-  --ink: #111111;
-  --ink-light: #555555;
-  --ink-lighter: #888888;
-  --border: #e8e8e6;
-  
-  --font-serif: var(--font-serif), serif;
-  --font-sans: var(--font-sans), sans-serif;
+  --bg: #F9F9F7;
+  --surface: #F2EFE9;
+  --border: #D8D4C7;
+  --ink: #111827;
+  --ink-light: #4B5563;
+  --ink-lighter: #9CA3AF;
+  --accent-red: #D23434;
+}
+
+body {
+  color: var(--ink);
+  background: var(--bg);
+  margin: 0;
+  font-family: var(--font-sans), sans-serif;
+}
+
+/* Luxury card styling */
+.luxury-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+}
+.luxury-card::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(0,0,0,0.05);
+  pointer-events: none;
+}
+/* Chamfered corners effect */
+.luxury-card-chamfer {
+  clip-path: polygon(
+    10px 0, calc(100% - 10px) 0, 
+    100% 10px, 100% calc(100% - 10px), 
+    calc(100% - 10px) 100%, 10px 100%, 
+    0 calc(100% - 10px), 0 10px
+  );
 }
 
 * { 

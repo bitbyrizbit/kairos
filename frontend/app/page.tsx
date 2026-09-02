@@ -10,6 +10,8 @@ import { useRipple } from "@/hooks/useRipple"
 
 type View = "dashboard" | "simulator" | "signals" | "historical"
 
+// We removed InteractiveLogo and replaced it with classic luxury editorial navigation.
+
 export default function Home() {
   const [view, setView] = useState<View>("dashboard")
   const { data: signals, loading: signalsLoading } = useSignals()
@@ -21,12 +23,36 @@ export default function Home() {
       {/* Background Layer: Map */}
       <WorldMap ripple={ripple?.ripple_chain ?? null} clusters={signals?.clusters ?? []} />
       
+      {/* Top Left: Luxury Stamp Logo (Like Image 1) */}
+      <div style={{ position: "absolute", top: 40, left: 40, zIndex: 10, display: "flex", flexDirection: "column" }}>
+        <h1 style={{ 
+          fontFamily: "var(--font-serif)", fontSize: 48, fontWeight: 400, 
+          color: "var(--ink)", letterSpacing: "0.1em", margin: 0, lineHeight: 1 
+        }}>
+          KAIROS
+        </h1>
+        <div style={{ 
+          fontFamily: "var(--font-script)", fontSize: 32, color: "var(--ink-light)", 
+          marginTop: "-10px", marginLeft: "10px" 
+        }}>
+          Intelligence
+        </div>
+      </div>
+
+      {/* Top Right: Luxury Editorial Navigation (Like Image 1) */}
+      <div style={{ position: "absolute", top: 40, right: 60, zIndex: 10, display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 12 }}>
+        <button onClick={() => setView("dashboard")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 500, letterSpacing: "0.15em", color: view === "dashboard" ? "var(--ink)" : "var(--ink-lighter)", textTransform: "uppercase" }}>Dashboard</button>
+        <button onClick={() => setView("simulator")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 500, letterSpacing: "0.15em", color: view === "simulator" ? "var(--ink)" : "var(--ink-lighter)", textTransform: "uppercase" }}>Simulator</button>
+        <button onClick={() => setView("signals")} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: 13, fontWeight: 500, letterSpacing: "0.15em", color: view === "signals" ? "var(--ink)" : "var(--ink-lighter)", textTransform: "uppercase" }}>Active Signals</button>
+      </div>
+
       {/* Simulator Overlay: Pure floating text input, no boxes */}
       {view === "simulator" && (
-        <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 10, pointerEvents: "none" }}>
+        <div className="fade-in" style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", zIndex: 10, pointerEvents: "none", background: "rgba(249, 249, 247, 0.8)", backdropFilter: "blur(10px)" }}>
+           <h2 style={{ fontFamily: "var(--font-serif)", fontSize: 56, fontWeight: 400, color: "var(--ink)", marginBottom: 40 }}>Simulate Scenario</h2>
            <input 
              autoFocus
-             placeholder="Type disruption scenario..."
+             placeholder="Input disruption event..."
              onKeyDown={e => {
                if (e.key === "Enter" && e.currentTarget.value.trim() && !rippleLoading) {
                  analyze(e.currentTarget.value)
@@ -35,14 +61,14 @@ export default function Home() {
              }}
              style={{
                background: "transparent", border: "none", outline: "none",
-               borderBottom: "1px solid var(--ink)", color: "var(--ink)",
-               fontFamily: "var(--font-serif)", fontSize: 32, fontStyle: "italic",
+               borderBottom: "1px solid var(--border)", color: "var(--ink)",
+               fontFamily: "var(--font-serif)", fontSize: 28, fontStyle: "italic",
                width: 600, textAlign: "center", paddingBottom: 16, pointerEvents: "auto"
              }}
              disabled={rippleLoading}
            />
            {rippleLoading && (
-             <div style={{ marginTop: 24, fontSize: 13, fontFamily: "var(--font-sans)", color: "var(--ink-light)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+             <div style={{ marginTop: 40, fontSize: 13, fontFamily: "var(--font-sans)", color: "var(--ink-light)", letterSpacing: "0.2em", textTransform: "uppercase" }}>
                Synthesizing Cascade...
              </div>
            )}
@@ -51,11 +77,11 @@ export default function Home() {
 
       {/* Narrative Overlay: When a ripple finishes, show the text raw on the map */}
       {view === "dashboard" && ripple && !rippleLoading && (
-        <div style={{ position: "absolute", right: 80, top: 120, width: 400, zIndex: 10, pointerEvents: "none" }}>
-          <h2 style={{ fontSize: 12, fontFamily: "var(--font-sans)", color: "var(--ink)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 16 }}>
+        <div className="luxury-card luxury-card-chamfer fade-in" style={{ position: "absolute", left: 40, bottom: 40, width: 440, zIndex: 10, padding: "40px 32px" }}>
+          <h2 style={{ fontSize: 24, fontFamily: "var(--font-serif)", color: "var(--ink)", fontWeight: 400, textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 24px 0" }}>
             Crisis Narrative
           </h2>
-          <p style={{ fontSize: 18, fontFamily: "var(--font-serif)", color: "var(--ink)", lineHeight: 1.6 }}>
+          <p style={{ fontSize: 14, fontFamily: "var(--font-sans)", color: "var(--ink-light)", lineHeight: 1.8, fontWeight: 300, margin: 0 }}>
             {ripple.crisis_narrative}
           </p>
         </div>
@@ -70,122 +96,22 @@ export default function Home() {
         </div>
       )}
 
-      {/* Novel Interface: Interactive Logo Navbar */}
-      <InteractiveLogo currentView={view} onChange={setView} />
-      
       {/* Global Index Display */}
-      <div style={{ position: "absolute", bottom: 40, left: 40, zIndex: 20, display: "flex", flexDirection: "column" }}>
+      <div style={{ position: "absolute", bottom: 40, right: 60, zIndex: 20, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
         <span style={{ fontSize: 11, fontFamily: "var(--font-sans)", color: "var(--ink-light)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
           Global Stability Index
         </span>
         <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-          <span style={{ fontSize: 48, fontFamily: "var(--font-serif)", fontWeight: 300, color: "var(--ink)", lineHeight: 1 }}>
-            {kairosIndex?.index_value ?? "--"}
-          </span>
           {kairosIndex && (
-             <span style={{ fontSize: 14, fontFamily: "var(--font-sans)", color: "var(--ink-light)" }}>
+             <span style={{ fontSize: 14, fontFamily: "var(--font-sans)", color: "var(--ink-light)", fontStyle: "italic" }}>
                {kairosIndex.status.charAt(0).toUpperCase() + kairosIndex.status.slice(1)}
              </span>
           )}
+          <span style={{ fontSize: 48, fontFamily: "var(--font-serif)", fontWeight: 300, color: "var(--ink)", lineHeight: 1 }}>
+            {kairosIndex?.index_value ?? "--"}
+          </span>
         </div>
       </div>
-      
-      {/* Minimal Analyze Input floating bottom right */}
-      {view === "dashboard" && (
-         <div style={{ position: "absolute", bottom: 40, right: 40, zIndex: 20, width: 400 }}>
-           <MinimalInput onAnalyze={analyze} isLoading={rippleLoading} />
-         </div>
-      )}
-    </div>
-  )
-}
-
-function InteractiveLogo({ currentView, onChange }: { currentView: View, onChange: (v: View) => void }) {
-  const [isHovered, setIsHovered] = useState(false)
-
-  const views: { id: View, label: string }[] = [
-    { id: "dashboard", label: "Dashboard" },
-    { id: "simulator", label: "Simulator" },
-    { id: "signals", label: "Signals" },
-    { id: "historical", label: "Historical" },
-  ]
-
-  return (
-    <div 
-      style={{ 
-        position: "absolute", top: 40, left: 40, zIndex: 99999,
-        display: "flex", alignItems: "center", 
-        fontFamily: "system-ui, -apple-system, sans-serif", fontSize: 32, 
-        fontWeight: 300, letterSpacing: "0.2em", color: "var(--ink)",
-        pointerEvents: "auto", userSelect: "none"
-      }}
-    >
-      <span style={{ marginRight: 6 }}>KAIR</span>
-      
-      {/* The O which acts as the nav trigger */}
-      <div 
-        onClick={() => setIsHovered(!isHovered)}
-        style={{ 
-          position: "relative", width: 36, height: 36, 
-          display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", 
-        }}
-      >
-        {/* The visual O */}
-        <motion.div 
-          animate={{ scale: isHovered ? 1.0 : 1 }}
-          style={{ 
-            width: 28, height: 28, borderRadius: "50%", 
-            border: "1px solid var(--ink)",
-            backgroundColor: isHovered ? "var(--ink)" : "transparent",
-            transition: "background-color 0.3s"
-          }} 
-        />
-        
-        {/* Expanding arc of navigation options */}
-        {isHovered && (
-          <div style={{ position: "absolute", top: 18, left: 18 }}>
-            {views.map((v, i) => {
-              // Arc calculation
-              const angle = (i / (views.length - 1)) * 90
-              const rad = angle * (Math.PI / 180)
-              const radius = 130 // Distance from O
-              const x = Math.cos(rad) * radius
-              const y = Math.sin(rad) * radius
-
-              return (
-                <motion.button
-                  key={v.id}
-                  initial={{ opacity: 0, x: 0, y: 0 }}
-                  animate={{ opacity: 1, x, y }}
-                  transition={{ delay: i * 0.05, type: "spring", stiffness: 200, damping: 20 }}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onChange(v.id)
-                    setIsHovered(false)
-                  }}
-                  style={{
-                    position: "absolute",
-                    transform: "translate(-50%, -50%)",
-                    background: currentView === v.id ? "var(--ink)" : "var(--surface)", 
-                    border: "1px solid var(--border)",
-                    color: currentView === v.id ? "var(--surface)" : "var(--ink-light)",
-                    padding: "6px 14px", borderRadius: 20, cursor: "pointer",
-                    fontFamily: "system-ui, -apple-system, sans-serif", fontSize: 11, fontWeight: 500,
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-                    whiteSpace: "nowrap", letterSpacing: "0.05em"
-                  }}
-                >
-                  {v.label}
-                </motion.button>
-              )
-            })}
-          </div>
-        )}
-      </div>
-      
-      {/* FIXED: Removed the negative margin that was causing the overlap! */}
-      <span style={{ marginLeft: 8 }}>S</span>
     </div>
   )
 }

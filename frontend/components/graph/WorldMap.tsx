@@ -121,89 +121,111 @@ export function WorldMap({ ripple, clusters }: Props) {
               .style("filter", "none")
           })
 
-        // Draw Markers (Score + Label) at centroids
-        // Create a specific group layer for markers so they stay on top
-        const markersLayer = g.append("g").attr("class", "markers-layer").style("pointer-events", "none")
+        // Create interactive ring markers (like Image 2)
+        const markersLayer = g.append("g").attr("class", "markers-layer")
+        
+        // Find centroids for active nodes
+        const markerData = Object.keys(active).map(nodeId => {
+          const entry = Object.entries(numericToNode).find(([num, id]) => id === nodeId)
+          if (!entry) return null
+          // @ts-ignore
+          const feature = countries.features.find((f: any) => +f.id === +entry[0])
+          if (!feature) return null
+          const centroid = path.centroid(feature)
+          if (isNaN(centroid[0])) return null
+          return { ...active[nodeId], x: centroid[0], y: centroid[1], nodeId }
+        }).filter(Boolean)
 
-        countryPaths.each(function(this: any, d: any) {
-          const nodeId = numericToNode[+d.id]
-          if (!nodeId || !active[nodeId]) return
+        // Draw Rings
+        const rings = markersLayer.selectAll(".ring").data(markerData).enter().append("g")
+          .attr("class", "ring")
+          .attr("transform", (d: any) => `translate(${d.x}, ${d.y})`)
+          .style("cursor", "pointer")
           
-          const centroid = path.centroid(d)
-          if (isNaN(centroid[0]) || isNaN(centroid[1])) return
+        rings.append("circle")
+          .attr("r", 14)
+          .attr("fill", "transparent")
+          .attr("stroke", "#ffffff")
+          .attr("stroke-width", 1.5)
+          .style("filter", "drop-shadow(0 2px 4px rgba(0,0,0,0.1))")
 
-          const [x, y] = centroid
-          const nodeData = active[nodeId]
-          const displayScore = Math.round(nodeData.severity * 100)
+        rings.append("circle")
+          .attr("r", 3)
+          .attr("fill", "#ffffff")
 
-          // Group for the pin
-          const pin = markersLayer.append("g")
-            .attr("transform", `translate(${x}, ${y})`)
+        // Interactive hover area
+        rings.append("circle")
+          .attr("r", 20)
+          .attr("fill", "transparent")
+          .on("click", (event: any, d: any) => {
+             // Pass up or handle local state. We will handle local state via a custom event or we can just bind to React state.
+             // Since d3 is outside react render cycle, we use a window event.
+             window.dispatchEvent(new CustomEvent("open-luxury-popup", { detail: d }))
+          })
 
-          // Score text
-          pin.append("text")
-            .text(displayScore)
-            .attr("text-anchor", "middle")
-            .attr("y", -6)
-            .attr("font-family", "var(--font-sans)")
-            .attr("font-size", "15px")
-            .attr("font-weight", "600")
-            .attr("fill", "#111")
-            .style("mix-blend-mode", "multiply")
-
-          // Label text
-          pin.append("text")
-            .text(nodeData.label)
-            .attr("text-anchor", "middle")
-            .attr("y", 8)
-            .attr("font-family", "var(--font-serif)")
-            .attr("font-size", "11px")
-            .attr("font-weight", "600")
-            .attr("fill", "#444")
-            .attr("letter-spacing", "0.05em")
-            .style("mix-blend-mode", "multiply")
-        })
-
-        // Routes
-        for (const [nodeId, [px, py]] of Object.entries(ROUTE_POSITIONS)) {
-          if (!active[nodeId]) continue
-          const x = (px / 100) * W
-          const y = (py / 100) * H
-          const displayScore = Math.round(active[nodeId].severity * 100)
-
-          const pin = g.append("g")
-            .attr("transform", `translate(${x}, ${y})`)
-            .style("pointer-events", "none")
-
-          pin.append("circle").attr("r", 4).attr("fill", "#000")
-
-          pin.append("text")
-            .text(displayScore)
-            .attr("text-anchor", "middle")
-            .attr("y", -12)
-            .attr("font-family", "var(--font-sans)")
-            .attr("font-size", "14px")
-            .attr("font-weight", "600")
-            .attr("fill", "#000")
-            
-          pin.append("text")
-            .text(active[nodeId].label)
-            .attr("text-anchor", "middle")
-            .attr("y", 14)
-            .attr("font-family", "var(--font-sans)")
-            .attr("font-size", "10px")
-            .attr("font-weight", "400")
-            .attr("fill", "#666")
-        }
       } catch (err) { console.log("Map load error:", err) }
     }
     draw()
   }, [mounted, ripple, clusters])
+  
+  const [activePopup, setActivePopup] = useState<any>(null)
+  
+  useEffect(() => {
+    const handler = (e: any) => setActivePopup(e.detail)
+    window.addEventListener("open-luxury-popup", handler)
+    return () => window.removeEventListener("open-luxury-popup", handler)
+  }, [])
 
-  // Map is interactive now, so remove pointerEvents: none from container
   return (
-    <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 0 }}>
-      <svg ref={svgRef} style={{ width: "100%", height: "100%" }} />
-    </div>
+    <>
+      <div style={{ position: "absolute", inset: 0, width: "100%", height: "100%", zIndex: 0 }}>
+        <svg ref={svgRef} style={{ width: "100%", height: "100%" }} />
+      </div>
+
+      {/* Luxury Popup Card Overlay (Like Image 3) */}
+      {activePopup && (
+        <div style={{
+          position: "absolute",
+          left: activePopup.x + 40,
+          top: activePopup.y - 120,
+          width: 320,
+          zIndex: 50,
+        }} className="luxury-card luxury-card-chamfer fade-in">
+          
+          {/* Close Button floating outside */}
+          <button 
+            onClick={() => setActivePopup(null)}
+            style={{
+              position: "absolute", left: -20, top: "50%", transform: "translateY(-50%)",
+              width: 40, height: 40, borderRadius: "50%",
+              background: "#fff", border: "1px solid var(--border)", boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", zIndex: 60
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+
+          <div style={{ padding: "40px 32px" }}>
+            <h3 style={{ 
+              fontFamily: "var(--font-serif)", fontSize: 26, 
+              fontWeight: 400, color: "#1A1A1A", 
+              textTransform: "uppercase", letterSpacing: "0.05em",
+              margin: "0 0 24px 0", lineHeight: 1.1
+            }}>
+              {activePopup.label}
+            </h3>
+            <p style={{
+              fontFamily: "var(--font-sans)", fontSize: 13,
+              color: "#333", lineHeight: 1.6, fontWeight: 300,
+              margin: 0
+            }}>
+              Severity Index: <span style={{ fontWeight: 500 }}>{Math.round(activePopup.severity * 100)}</span><br/><br/>
+              Monitoring anomalous supply chain and stability signals across regional nodes.
+            </p>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
