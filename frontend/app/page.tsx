@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { WorldMap } from "@/components/graph/WorldMap"
 
@@ -17,9 +17,27 @@ export default function Home() {
   const { data: signals, loading: signalsLoading } = useSignals()
   const kairosIndex = useKairosScore(signals)
   const { data: ripple, loading: rippleLoading, analyze } = useRipple()
+  const [showLoader, setShowLoader] = useState(true)
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowLoader(false), 2500)
+    return () => clearTimeout(t)
+  }, [])
+
+  if (showLoader) {
+    return (
+      <div className="fade-in" style={{ width: "100vw", height: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+        <h1 style={{ fontFamily: "var(--font-serif)", fontSize: 56, fontWeight: 400, color: "var(--ink)", letterSpacing: "0.1em" }}>KAIROS</h1>
+        <div style={{ fontFamily: "var(--font-script)", fontSize: 32, color: "var(--ink-light)", marginTop: "-15px", marginLeft: "20px" }}>Intelligence</div>
+        <div style={{ fontFamily: "var(--font-sans)", fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--ink-lighter)", marginTop: 60, opacity: 0.7 }}>
+          Calibrating Global Node Index...
+        </div>
+      </div>
+    )
+  }
   
   return (
-    <div style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden", backgroundColor: "var(--bg)" }}>
+    <div className="fade-in" style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden", backgroundColor: "var(--bg)" }}>
       {/* Background Layer: Map */}
       <WorldMap ripple={ripple?.ripple_chain ?? null} clusters={signals?.clusters ?? []} />
       

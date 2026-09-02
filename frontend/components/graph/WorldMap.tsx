@@ -138,6 +138,42 @@ export function WorldMap({ ripple, clusters }: Props) {
              window.dispatchEvent(new CustomEvent("open-luxury-popup", { detail: { ...d, screenX, screenY } }))
           })
 
+        // Draw animated ripple lines if a ripple cascade is active
+        if (ripple) {
+          const originEntry = Object.entries(numericToNode).find(([_, id]) => id === ripple.origin_node)
+          const originFeature = originEntry ? countries.features.find((f: any) => +f.id === +originEntry[0]) : null
+          const originCentroid = originFeature ? path.centroid(originFeature) : null
+
+          if (originCentroid && !isNaN(originCentroid[0])) {
+            const ripplePaths = markersLayer.append("g").attr("class", "ripple-lines")
+            
+            for (const hop of ripple.hops) {
+              const targetEntry = Object.entries(numericToNode).find(([_, id]) => id === hop.node_id)
+              const targetFeature = targetEntry ? countries.features.find((f: any) => +f.id === +targetEntry[0]) : null
+              const targetCentroid = targetFeature ? path.centroid(targetFeature) : null
+              
+              if (targetCentroid && !isNaN(targetCentroid[0])) {
+                const dx = targetCentroid[0] - originCentroid[0]
+                const dy = targetCentroid[1] - originCentroid[1]
+                const dr = Math.sqrt(dx * dx + dy * dy) * 1.5 // nice bezier bend
+                
+                const pathNode = ripplePaths.append("path")
+                  .attr("d", `M${originCentroid[0]},${originCentroid[1]} A${dr},${dr} 0 0,1 ${targetCentroid[0]},${targetCentroid[1]}`)
+                  .attr("fill", "none")
+                  .attr("stroke", "rgba(255, 60, 60, 0.6)")
+                  .attr("stroke-width", 1.5)
+                  .style("filter", "drop-shadow(0 0 6px rgba(255, 60, 60, 0.8))")
+                  
+                const length = (pathNode.node() as SVGPathElement).getTotalLength()
+                pathNode.attr("stroke-dasharray", length + " " + length)
+                  .attr("stroke-dashoffset", length)
+                  .transition().duration(2500).ease(d3.easeCubicOut)
+                  .attr("stroke-dashoffset", 0)
+              }
+            }
+          }
+        }
+
       } catch (err) { console.log("Map load error:", err) }
     }
     draw()
@@ -157,52 +193,49 @@ export function WorldMap({ ripple, clusters }: Props) {
         <svg ref={svgRef} style={{ width: "100%", height: "100%" }} />
       </div>
 
-      {/* Luxury Popup Card Overlay (Like Image 3) */}
+      {/* Luxury Popup Card Overlay (Circular Lens) */}
       {activePopup && (
-        <div style={{
-          position: "absolute",
-          left: activePopup.screenX > window.innerWidth / 2 ? activePopup.screenX - 350 : activePopup.screenX + 30,
-          top: activePopup.screenY,
-          transform: "translateY(-50%)",
-          width: 320,
-          zIndex: 50,
-        }} className="luxury-card luxury-card-chamfer fade-in">
-          
-          {/* Close Button floating outside */}
-          <button 
-            onClick={() => setActivePopup(null)}
-            style={{
-              position: "absolute", 
-              left: activePopup.screenX > window.innerWidth / 2 ? 'auto' : -20, 
-              right: activePopup.screenX > window.innerWidth / 2 ? -20 : 'auto', 
-              top: "50%", transform: "translateY(-50%)",
-              width: 40, height: 40, borderRadius: "50%",
-              background: "#fff", border: "1px solid var(--border)", boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", zIndex: 60
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-          </button>
-
-          <div style={{ padding: "40px 32px" }}>
+        <div 
+          onMouseLeave={() => setActivePopup(null)}
+          style={{
+            position: "absolute",
+            left: activePopup.screenX,
+            top: activePopup.screenY,
+            transform: "translate(-50%, -50%)",
+            width: 280, height: 280,
+            borderRadius: "50%",
+            zIndex: 50,
+            display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+            textAlign: "center",
+            padding: 32,
+            background: "rgba(249, 249, 247, 0.95)",
+            backdropFilter: "blur(12px)",
+            border: "1px solid rgba(0,0,0,0.05)",
+            boxShadow: "0 20px 50px rgba(0,0,0,0.1)",
+            pointerEvents: "auto" // catch mouseleave
+          }} 
+          className="fade-in"
+        >
             <h3 style={{ 
-              fontFamily: "var(--font-serif)", fontSize: 26, 
-              fontWeight: 400, color: "#1A1A1A", 
-              textTransform: "uppercase", letterSpacing: "0.05em",
-              margin: "0 0 24px 0", lineHeight: 1.1
+              fontFamily: "var(--font-serif)", fontSize: 28, 
+              fontWeight: 400, color: "var(--ink)", 
+              textTransform: "uppercase", letterSpacing: "0.1em",
+              margin: "0 0 12px 0", lineHeight: 1.1
             }}>
               {activePopup.label}
             </h3>
+            <span style={{ fontSize: 11, fontFamily: "var(--font-sans)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--ink-light)", marginBottom: 16 }}>
+              Severity: <strong style={{ color: "var(--ink)", fontSize: 13 }}>{Math.round(activePopup.severity * 100)}</strong>
+            </span>
             <p style={{
-              fontFamily: "var(--font-sans)", fontSize: 13,
-              color: "#333", lineHeight: 1.6, fontWeight: 300,
-              margin: 0
+              fontFamily: "var(--font-sans)", fontSize: 12,
+              color: "var(--ink-light)", lineHeight: 1.6, fontWeight: 300,
+              margin: 0,
+              display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden"
             }}>
-              Severity Index: <span style={{ fontWeight: 500 }}>{Math.round(activePopup.severity * 100)}</span><br/><br/>
               {activePopup.description || "Monitoring anomalous supply chain and stability signals across regional nodes."}
             </p>
-          </div>
         </div>
       )}
     </>
