@@ -53,6 +53,17 @@ async def analyze_event(req: AnalyzeEventRequest):
             "similar_historical_events": []
         }
 
+    from app.services.db_service import save_analyzed_event
+    try:
+        save_analyzed_event(
+            description=req.description,
+            parsed_event=parsed,
+            ripple_chain=ripple,
+            kairos_score=parsed["kairos_score"]
+        )
+    except Exception as db_err:
+        print(f"Warning: Failed to save to database: {db_err}")
+
     return AnalyzeEventResponse(
         parsed_event=parsed,
         ripple_chain=ripple,
