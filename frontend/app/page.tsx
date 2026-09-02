@@ -20,9 +20,11 @@ export default function Home() {
   const [showLoader, setShowLoader] = useState(true)
 
   useEffect(() => {
-    const t = setTimeout(() => setShowLoader(false), 3000)
+    const t = setTimeout(() => setShowLoader(false), 2500)
     return () => clearTimeout(t)
   }, [])
+
+  const text = "Intelligence"
 
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh", overflow: "hidden", backgroundColor: "var(--bg)" }}>
@@ -31,22 +33,26 @@ export default function Home() {
         {showLoader && (
           <motion.div 
             key="loader"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0, scale: 1.05, filter: "blur(10px)" }}
-            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
             style={{ width: "100vw", height: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "absolute", zIndex: 999 }}
           >
-            <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3, duration: 1, ease: "easeOut" }}>
-              <h1 style={{ fontFamily: "var(--font-serif)", fontSize: 56, fontWeight: 400, color: "var(--ink)", letterSpacing: "0.1em", margin: 0 }}>KAIROS</h1>
-            </motion.div>
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6, duration: 1, ease: "easeOut" }}>
-              <div style={{ fontFamily: "var(--font-script)", fontSize: 32, color: "var(--ink-light)", marginTop: "-15px", marginLeft: "20px" }}>Intelligence</div>
-            </motion.div>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.7 }} transition={{ delay: 1.2, duration: 1 }}>
-              <div style={{ fontFamily: "var(--font-sans)", fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--ink-lighter)", marginTop: 60 }}>
-                Calibrating Global Node Index...
-              </div>
-            </motion.div>
+            <h1 style={{ fontFamily: "var(--font-serif)", fontSize: 56, fontWeight: 400, color: "var(--ink)", letterSpacing: "0.1em", margin: 0 }}>KAIROS</h1>
+            <div style={{ fontFamily: "var(--font-script)", fontSize: 32, color: "var(--ink-light)", marginTop: "-15px", marginLeft: "20px", display: "flex" }}>
+              {text.split("").map((char, index) => (
+                <motion.span
+                  key={index}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 + index * 0.05, duration: 0.1 }}
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </div>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: 11, letterSpacing: "0.3em", textTransform: "uppercase", color: "var(--ink-lighter)", marginTop: 60 }}>
+              Calibrating Global Node Index...
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

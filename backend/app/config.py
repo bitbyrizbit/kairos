@@ -17,8 +17,8 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # -- API Keys --
-    groq_api_key: str
-    news_api_key: str
+    groq_api_key: str | None = None
+    news_api_key: str | None = None
     supabase_url: str | None = None
     supabase_key: str | None = None
 

@@ -137,6 +137,9 @@ export function WorldMap({ ripple, clusters }: Props) {
              const screenY = transform.applyY(d.y)
              window.dispatchEvent(new CustomEvent("open-luxury-popup", { detail: { ...d, screenX, screenY } }))
           })
+          .on("mouseleave", () => {
+             window.dispatchEvent(new CustomEvent("open-luxury-popup", { detail: null }))
+          })
 
         // Draw animated ripple lines if a ripple cascade is active
         if (ripple) {
@@ -196,43 +199,42 @@ export function WorldMap({ ripple, clusters }: Props) {
       {/* Luxury Popup Card Overlay (Circular Lens) */}
       {activePopup && (
         <div 
-          onMouseLeave={() => setActivePopup(null)}
           style={{
             position: "absolute",
             left: activePopup.screenX,
-            top: activePopup.screenY,
+            top: activePopup.screenY - 140, // Offset it UP
             transform: "translate(-50%, -50%)",
-            width: 280, height: 280,
+            width: 240, height: 240, // Slightly smaller
             borderRadius: "50%",
             zIndex: 50,
             display: "flex", flexDirection: "column",
             alignItems: "center", justifyContent: "center",
             textAlign: "center",
-            padding: 32,
+            padding: 24,
             background: "rgba(249, 249, 247, 0.95)",
             backdropFilter: "blur(12px)",
             border: "1px solid rgba(0,0,0,0.05)",
             boxShadow: "0 20px 50px rgba(0,0,0,0.1)",
-            pointerEvents: "auto" // catch mouseleave
+            pointerEvents: "none" // Let the ring underneath keep the mouse hover!
           }} 
           className="fade-in"
         >
             <h3 style={{ 
-              fontFamily: "var(--font-serif)", fontSize: 28, 
+              fontFamily: "var(--font-serif)", fontSize: 24, 
               fontWeight: 400, color: "var(--ink)", 
               textTransform: "uppercase", letterSpacing: "0.1em",
-              margin: "0 0 12px 0", lineHeight: 1.1
+              margin: "0 0 8px 0", lineHeight: 1.1
             }}>
               {activePopup.label}
             </h3>
-            <span style={{ fontSize: 11, fontFamily: "var(--font-sans)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--ink-light)", marginBottom: 16 }}>
-              Severity: <strong style={{ color: "var(--ink)", fontSize: 13 }}>{Math.round(activePopup.severity * 100)}</strong>
+            <span style={{ fontSize: 10, fontFamily: "var(--font-sans)", letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--ink-light)", marginBottom: 12 }}>
+              Severity: <strong style={{ color: "var(--ink)", fontSize: 12 }}>{Math.round(activePopup.severity * 100)}</strong>
             </span>
             <p style={{
-              fontFamily: "var(--font-sans)", fontSize: 12,
+              fontFamily: "var(--font-sans)", fontSize: 11,
               color: "var(--ink-light)", lineHeight: 1.6, fontWeight: 300,
               margin: 0,
-              display: "-webkit-box", WebkitLineClamp: 4, WebkitBoxOrient: "vertical", overflow: "hidden"
+              display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden"
             }}>
               {activePopup.description || "Monitoring anomalous supply chain and stability signals across regional nodes."}
             </p>
