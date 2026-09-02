@@ -30,19 +30,21 @@ export function WorldMap({ ripple, clusters }: Props) {
   const zoomRef = useRef<any>(null)
   const [mounted, setMounted] = useState(false)
 
-  const active: Record<string, { severity: number; label: string }> = {}
+  const active: Record<string, { severity: number; label: string; description?: string }> = {}
   if (ripple) {
-    active[ripple.origin_node] = { severity: 1.0, label: ripple.origin_node }
+    active[ripple.origin_node] = { severity: 1.0, label: ripple.origin_node, description: "Epicenter of cascading disruption." }
     for (const hop of ripple.hops) {
       if (NODE_TO_ISO[hop.node_id] || ROUTE_POSITIONS[hop.node_id]) {
-        active[hop.node_id] = { severity: hop.severity_score, label: hop.node_label }
+        active[hop.node_id] = { severity: hop.severity_score, label: hop.node_label, description: hop.impact_description }
       }
     }
   }
   for (const c of clusters) {
     for (const r of c.primary_regions) {
       const match = Object.keys(NODE_TO_ISO).find(k => k.toLowerCase() === r.toLowerCase().slice(0, 3))
-      if (match && !active[match]) active[match] = { severity: c.kairos_score / 100, label: r }
+      if (match && !active[match]) {
+        active[match] = { severity: c.kairos_score / 100, label: r, description: `Active anomaly cluster: ${c.theme}` }
+      }
     }
   }
 
@@ -73,58 +75,30 @@ export function WorldMap({ ripple, clusters }: Props) {
         gRef.current = g
 
         const zoom = d3.zoom<SVGSVGElement, unknown>().scaleExtent([1, 6]).translateExtent([[0, 0], [W, H]])
-          .on("zoom", (event) => g.attr("transform", event.transform.toString()))
+          .on("zoom", (event) => {
+             g.attr("transform", event.transform.toString())
+             window.dispatchEvent(new CustomEvent("open-luxury-popup", { detail: null }))
+          })
         svg.call(zoom as any)
         zoomRef.current = zoom
 
-        // Graticule - very subtle
-        const graticule = d3.geoGraticule()
-        g.append("path").datum(graticule()).attr("d", path as any).attr("fill", "none")
-          .attr("stroke", "var(--border)").attr("stroke-width", 0.5)
-
+        // @ts-ignore
+        const land = topojson.feature(world, world.objects.land)
         // @ts-ignore
         const countries = topojson.feature(world, world.objects.countries)
-        
-        // Define filters inside SVG for the smoke effect
-        const defs = svg.append("defs")
-        const filter = defs.append("filter").attr("id", "smoke-glow").attr("x", "-50%").attr("y", "-50%").attr("width", "200%").attr("height", "200%")
-        filter.append("feGaussianBlur").attr("in", "SourceGraphic").attr("stdDeviation", "8").attr("result", "blur")
-        filter.append("feMerge").selectAll("feMergeNode").data(["blur", "SourceGraphic"]).enter().append("feMergeNode").attr("in", d => d)
 
-        // Group for all map paths to isolate raise()
-        const mapLayer = g.append("g").attr("class", "map-layer")
-
-        // @ts-ignore
-        const countryPaths = mapLayer.selectAll(".country").data((countries as any).features).enter().append("path").attr("class", "country")
+        // Draw the ultra-premium continuous landmass (No borders, no grids)
+        g.append("path")
+          .datum(land)
           .attr("d", path as any)
-          .attr("fill", (d: any) => {
-            const nodeId = numericToNode[+d.id]
-            if (!nodeId || !active[nodeId]) return "#fcfcfc"
-            const v = Math.round(240 - (active[nodeId].severity * 60))
-            return `rgb(${v},${v},${v})`
-          })
-          .attr("stroke", "var(--border)")
-          .attr("stroke-width", 0.5)
-          .style("transition", "stroke 0.8s ease, stroke-width 0.8s ease, filter 0.8s ease")
-          
-        countryPaths.on("mouseenter", function(this: any) {
-            d3.select(this)
-              .attr("stroke", "transparent") // NO RED LINE!
-              .attr("stroke-width", 2)
-              .style("filter", "drop-shadow(0px 0px 15px rgba(255, 51, 51, 1))") // ONLY SMOKE
-              .raise() // bring to front so stroke doesn't get clipped by neighbors
-          })
-          .on("mouseleave", function(this: any) {
-            d3.select(this)
-              .attr("stroke", "var(--border)")
-              .attr("stroke-width", 0.5)
-              .style("filter", "none")
-          })
+          .attr("fill", "#E6E2D6") // Elegant architectural stone color
+          .attr("stroke", "none")
+          .style("filter", "drop-shadow(0 10px 20px rgba(0,0,0,0.02))")
 
-        // Create interactive ring markers (like Image 2)
+        // Create interactive ring markers
         const markersLayer = g.append("g").attr("class", "markers-layer")
         
-        // Find centroids for active nodes
+        // Find centroids for active nodes using the invisible country features
         const markerData = Object.keys(active).map(nodeId => {
           const entry = Object.entries(numericToNode).find(([num, id]) => id === nodeId)
           if (!entry) return null
@@ -157,10 +131,11 @@ export function WorldMap({ ripple, clusters }: Props) {
         rings.append("circle")
           .attr("r", 20)
           .attr("fill", "transparent")
-          .on("click", (event: any, d: any) => {
-             // Pass up or handle local state. We will handle local state via a custom event or we can just bind to React state.
-             // Since d3 is outside react render cycle, we use a window event.
-             window.dispatchEvent(new CustomEvent("open-luxury-popup", { detail: d }))
+          .on("mouseenter", (event: any, d: any) => {
+             const transform = d3.zoomTransform(svg.node() as Element)
+             const screenX = transform.applyX(d.x)
+             const screenY = transform.applyY(d.y)
+             window.dispatchEvent(new CustomEvent("open-luxury-popup", { detail: { ...d, screenX, screenY } }))
           })
 
       } catch (err) { console.log("Map load error:", err) }
@@ -186,8 +161,9 @@ export function WorldMap({ ripple, clusters }: Props) {
       {activePopup && (
         <div style={{
           position: "absolute",
-          left: activePopup.x + 40,
-          top: activePopup.y - 120,
+          left: activePopup.screenX > window.innerWidth / 2 ? activePopup.screenX - 350 : activePopup.screenX + 30,
+          top: activePopup.screenY,
+          transform: "translateY(-50%)",
           width: 320,
           zIndex: 50,
         }} className="luxury-card luxury-card-chamfer fade-in">
@@ -196,7 +172,10 @@ export function WorldMap({ ripple, clusters }: Props) {
           <button 
             onClick={() => setActivePopup(null)}
             style={{
-              position: "absolute", left: -20, top: "50%", transform: "translateY(-50%)",
+              position: "absolute", 
+              left: activePopup.screenX > window.innerWidth / 2 ? 'auto' : -20, 
+              right: activePopup.screenX > window.innerWidth / 2 ? -20 : 'auto', 
+              top: "50%", transform: "translateY(-50%)",
               width: 40, height: 40, borderRadius: "50%",
               background: "#fff", border: "1px solid var(--border)", boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
               display: "flex", alignItems: "center", justifyContent: "center",
@@ -221,7 +200,7 @@ export function WorldMap({ ripple, clusters }: Props) {
               margin: 0
             }}>
               Severity Index: <span style={{ fontWeight: 500 }}>{Math.round(activePopup.severity * 100)}</span><br/><br/>
-              Monitoring anomalous supply chain and stability signals across regional nodes.
+              {activePopup.description || "Monitoring anomalous supply chain and stability signals across regional nodes."}
             </p>
           </div>
         </div>

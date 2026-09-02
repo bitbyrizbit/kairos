@@ -98,9 +98,6 @@ export default function Home() {
 
       {/* Global Index Display */}
       <div style={{ position: "absolute", bottom: 40, right: 60, zIndex: 20, display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-        <span style={{ fontSize: 11, fontFamily: "var(--font-sans)", color: "var(--ink-light)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 4 }}>
-          Global Stability Index
-        </span>
         <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
           {kairosIndex && (
              <span style={{ fontSize: 14, fontFamily: "var(--font-sans)", color: "var(--ink-light)", fontStyle: "italic" }}>
